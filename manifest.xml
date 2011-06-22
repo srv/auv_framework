@@ -1,0 +1,28 @@
+<package>
+  <description brief="fugu_joy">
+
+     Teleoperation package for the fugu-c robot. Currently includes 
+     a joystick sampler library and a joystick teleoperation node.
+     
+     The node provides several control modes that can be switched on line.
+     Joystick commands are translated to twist, wrench or motor levels
+     depending on the current mode, and published on the corresponding topic.
+
+  </description>
+  <author>Joan Pau Beltran</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/fugu_teleoperation</url>
+  <depend package="roscpp"/>
+  <depend package="control_common"/>
+  <depend package="sensor_msgs"/>
+  <depend package="joy"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" 
+         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljoy_state" />
+  </export>
+
+</package>
+
+
