@@ -44,14 +44,16 @@
 #include <ros/ros.h>
 #include <joy/Joy.h>
 #include <control_common/control_types.h>
-#include <fugu_teleoperation/joy_state.h>
+#include "fugu_teleoperation/joy_state.h"
+#include "fugu_teleoperation/wrench_policy.h"
+
 
 class FuguTeleopJoyNode
 {
 public:
   FuguTeleopJoyNode();
   void initParams();
-  void advertiseTopics();
+  void loadPolicies();
   void subscribeTopics();
 
 private:
@@ -60,41 +62,15 @@ private:
   ros::Publisher publ_;
   ros::Subscriber joy_subs_;
 
-  std::string frame_id_;
+  typedef boost::shared_ptr<fugu_teleoperation::TeleopPolicy> TeleopPolicyPtr;
+  std::vector<TeleopPolicyPtr> policies_;
+  std::vector<TeleopPolicyPtr>::iterator current_policy_;
+  void changePolicy();
 
+  int policy_bttn_;
   fugu_teleoperation::JoyState joy_state_;
-
-  enum DOFS {LIN_X, LIN_Y, LIN_Z, ANG_X, ANG_Y, ANG_Z};
-  static const int NUM_DOFS = 6;
-
-  struct DOFMapping
-  {
-    int incrm_axis_;
-    int poffs_bttn_;
-    int noffs_bttn_;
-    int reset_bttn_;
-    double factor_;
-    double step_;
-  };
-
-  DOFMapping dof_map_[NUM_DOFS];
-
-  struct DOFState
-  {
-    float offst_;
-    float incrm_;
-    float value_;
-  };
-
-  DOFState dof_state_[NUM_DOFS];
-
-  bool updateDOFState(DOFState& s,
-                      const DOFMapping& m, const fugu_teleoperation::JoyState& j);
-
   void joyCallback(const joy::Joy::ConstPtr& joy);
-
 };
-
 
 FuguTeleopJoyNode::FuguTeleopJoyNode()
 : priv_("~")
@@ -102,44 +78,24 @@ FuguTeleopJoyNode::FuguTeleopJoyNode()
 
 void FuguTeleopJoyNode::initParams()
 {
-  std::string dof_names[NUM_DOFS];
-  dof_names[LIN_X] = "lin_x";
-  dof_names[LIN_Y] = "lin_y";
-  dof_names[LIN_Z] = "lin_z";
-  dof_names[ANG_X] = "ang_x";
-  dof_names[ANG_Y] = "ang_y";
-  dof_names[ANG_Z] = "ang_z";
-  for (int i=0; i<NUM_DOFS; i++)
-  {
-    // Set mapping from parameter server
-    std::string dof_name = dof_names[i];
-    ROS_INFO_STREAM("Setting mapping for " << dof_name << "...");
-    priv_.param(dof_name+"_incrm_axis",dof_map_[i].incrm_axis_,-1);
-    priv_.param(dof_name+"_noffs_bttn",dof_map_[i].noffs_bttn_,-1);
-    priv_.param(dof_name+"_poffs_bttn",dof_map_[i].poffs_bttn_,-1);
-    priv_.param(dof_name+"_reset_bttn",dof_map_[i].reset_bttn_,-1);
-    priv_.param(dof_name+"_factor", dof_map_[i].factor_,0.0);
-    priv_.param(dof_name+"_step", dof_map_[i].step_,0.0);
-    ROS_DEBUG_STREAM(dof_name+" increment axis   : " << dof_map_[i].incrm_axis_);
-    ROS_DEBUG_STREAM(dof_name+" increment factor : " << dof_map_[i].factor_);
-    ROS_DEBUG_STREAM(dof_name+" offset buttons : " << dof_map_[i].noffs_bttn_ << " "
-                                                   << dof_map_[i].poffs_bttn_);
-    ROS_DEBUG_STREAM(dof_name+" offset step    : " << dof_map_[i].step_);
-    ROS_DEBUG_STREAM(dof_name+" reset button   : " << dof_map_[i].reset_bttn_);
-    // Initialize DOF state
-    dof_state_[i].incrm_ = 0.0;
-    dof_state_[i].offst_ = 0.0;
-    dof_state_[i].value_ = 0.0;
-  }
-
-  priv_.param("frame_id",frame_id_,std::string());
-//  priv_.param("pause_bttn",pause_ctrl.id,-1);
-//  ROS_INFO_STREAM("Pause button set to " << pause_ctrl.id);
+  priv_.param("policy_bttn",policy_bttn_, -1);
+  ROS_DEBUG_STREAM("Policy button set to : " << policy_bttn_ );
 }
 
-void FuguTeleopJoyNode::advertiseTopics()
+void FuguTeleopJoyNode::loadPolicies()
 {
-  publ_ = nh_.advertise<control_common::WrenchLevelsStamped>("wrench_levels", 10);
+  TeleopPolicyPtr wrench_policy_ptr_( new fugu_teleoperation::WrenchPolicy(nh_,priv_) );
+  policies_.push_back(wrench_policy_ptr_);
+  current_policy_ = policies_.begin();
+  (*current_policy_)->init();
+}
+
+void FuguTeleopJoyNode::changePolicy()
+{
+  (*current_policy_)->stop();
+  if (++current_policy_ == policies_.end())
+    current_policy_ = policies_.begin();
+  (*current_policy_)->init();
 }
 
 void FuguTeleopJoyNode::subscribeTopics()
@@ -148,55 +104,12 @@ void FuguTeleopJoyNode::subscribeTopics()
                                       &FuguTeleopJoyNode::joyCallback, this);
 }
 
-bool FuguTeleopJoyNode::updateDOFState(DOFState& s,
-                                       const DOFMapping& m,
-                                       const fugu_teleoperation::JoyState& j)
-{
-  bool update = false;
-  if ( j.buttonPressed(m.reset_bttn_) )
-  {
-    s.offst_ = 0.0;
-    update = true;
-  }
-  if ( j.buttonPressed(m.noffs_bttn_) )
-  {
-    s.offst_ -= m.step_;
-    update = true;
-  }
-  if ( j.buttonPressed(m.poffs_bttn_) )
-  {
-    s.offst_ += m.step_;
-    update = true;
-  }
-  if ( j.axisMoved(m.incrm_axis_) )
-  {
-    s.incrm_ = m.factor_*j.axisPosition(m.incrm_axis_);
-    update = true;
-  }
-  if (update)
-    s.value_ = s.offst_ + s.incrm_;
-  return update;
-}
-
 void FuguTeleopJoyNode::joyCallback(const joy::Joy::ConstPtr& joy)
 {
-  bool updated = false;
   joy_state_.update(joy);
-  for (int i=0; i<NUM_DOFS; i++)
-    if ( updateDOFState(dof_state_[i], dof_map_[i], joy_state_) )
-      updated = true;
-  if ( updated )
+  if (joy_state_.buttonPressed(policy_bttn_))
   {
-    control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
-    msg->header.stamp = ros::Time::now();
-    msg->header.frame_id = frame_id_;
-    msg->wrench.force.x = dof_state_[LIN_X].value_;
-    msg->wrench.force.y = dof_state_[LIN_Y].value_;
-    msg->wrench.force.z = dof_state_[LIN_Z].value_;
-    msg->wrench.torque.x = dof_state_[ANG_X].value_;
-    msg->wrench.torque.y = dof_state_[ANG_Y].value_;
-    msg->wrench.torque.z = dof_state_[ANG_Z].value_;
-    publ_.publish(msg);
+    changePolicy();
   }
 }
 
@@ -205,7 +118,6 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "fugu_teleop_joy_node");
   FuguTeleopJoyNode teleop_fugu;
   teleop_fugu.initParams();
-  teleop_fugu.advertiseTopics();
   teleop_fugu.subscribeTopics();
   ros::spin();
 }

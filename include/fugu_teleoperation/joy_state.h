@@ -2,7 +2,7 @@
  * @file joy_state.h
  * @brief Joystick state class for sampling button and axis states.
  * @author Joan Pau Beltran
- * @date 2011-02-08
+ * @date 2011-06-29
  *
  * This file presents a joystick state class to retrieve information
  * about the current state of axes and buttons and their changes.
