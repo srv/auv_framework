@@ -4,7 +4,7 @@
  *
  */
 #ifndef TELEOP_POLICY_H
-#define WRENCH_POLICY_H
+#define TELEOP_POLICY_H
 
 #include "fugu_teleoperation/joy_state.h"
 
@@ -16,7 +16,7 @@ namespace fugu_teleoperation
  * Teleoperation policies provide different responses to joystick states.
  * Usually, concrete policies are derived from this abstract class,
  * implementing the constructor, update() function,
- * and optionally init() and stop() functions.
+ * and optionally init(), start() and stop() functions.
  *
  * The init() function is supposed to initialize the policy
  * (e.g. set joystick mappping and other parameters, advertise topics).
@@ -28,11 +28,12 @@ class TeleopPolicy
 {
 public:
   virtual void init() {}; //!< initialize the policy
-  virtual void update(const JoyState& s) = 0; //!< joystick response
+  virtual void update(const JoyState& j) = 0; //!< joystick response
+  virtual void start() {};
   virtual void stop() {};
   virtual ~TeleopPolicy() {};
 };
 
 } // namespace
 
-#endif // WRENCH_POLICY_H
+#endif // TELEOP_POLICY_H

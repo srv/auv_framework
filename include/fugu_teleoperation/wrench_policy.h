@@ -16,15 +16,16 @@ namespace fugu_teleoperation
 
 /** Wrench teleoperation policy class.
  *
- * The wrench policy responds to joystick events controlling the wrench levels
- * on the surge, heave, roll and yaw DOF.
+ * The wrench policy responds to joystick events
+ * controlling the wrench levels on each DOF.
  */
 class WrenchPolicy : public TeleopPolicy
 {
 public:
   WrenchPolicy(const ros::NodeHandle& n, const ros::NodeHandle& p);
   void init();
-  void update(const JoyState& s); //!< joystick response
+  void update(const JoyState& j); //!< joystick response
+  void start();
   void stop();
 
 private:
@@ -64,7 +65,7 @@ private:
   void initParams();
   void advertiseTopics();
 
-  bool updateDOFState(DOFState& s, const DOFMapping& m,
+  bool updateDOFState(DOFState& d, const DOFMapping& m,
                       const fugu_teleoperation::JoyState& j);
 
 };

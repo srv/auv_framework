@@ -33,5 +33,6 @@ rosbuild_add_library(joy_state src/joy_state.cpp)
 
 rosbuild_add_executable(fugu_teleop_joy_node 
                           src/fugu_teleop_joy_node.cpp
-                          src/wrench_policy.cpp)
+                          src/wrench_policy.cpp
+                          src/motor_policy.cpp)
 target_link_libraries(fugu_teleop_joy_node joy_state)

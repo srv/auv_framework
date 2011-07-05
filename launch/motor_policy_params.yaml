@@ -1,0 +1,41 @@
+frame_id: ""
+
+fw_lin_step: 10.0
+fw_lin_factor: 100.0
+
+fw_ang_step: 10.0
+fw_ang_factor: -100.0
+
+dw_lin_step: 10.0
+dw_lin_factor: 100.0
+
+dw_ang_step: 10.0
+dw_ang_factor: -100.0
+
+
+pause_bttn: 3
+
+
+fw_lin_incrm_axis: 1
+fw_lin_poffs_bttn: 4
+fw_lin_noffs_bttn: 6
+fw_lin_reset_bttn: 10
+
+
+fw_ang_incrm_axis: 0
+fw_ang_poffs_bttn: 5
+fw_ang_noffs_bttn: 7
+fw_ang_reset_bttn: 8
+
+
+dw_lin_incrm_axis: 3
+dw_lin_poffs_bttn: 12
+dw_lin_noffs_bttn: 14
+dw_lin_reset_bttn: 11
+
+
+dw_ang_incrm_axis: 2
+dw_ang_poffs_bttn: 13
+dw_ang_noffs_bttn: 15
+dw_ang_reset_bttn: 9
+
