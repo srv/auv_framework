@@ -9,8 +9,9 @@
   <!-- fugu_teleop_joy -->
   <node pkg="fugu_teleoperation" type="fugu_teleop_joy_node" name="fugu_teleop_joy_node" output="screen">
     <param name="policy_bttn" value="0" />
-    <rosparam param="wrench_policy" file="$(find fugu_teleoperation)/launch/wrench_policy_params.yaml" />
     <rosparam param="motor_policy" file="$(find fugu_teleoperation)/launch/motor_policy_params.yaml" />
+    <rosparam param="wrench_policy" file="$(find fugu_teleoperation)/launch/wrench_policy_params.yaml" />
+    <rosparam param="twist_policy" file="$(find fugu_teleoperation)/launch/twist_policy_params.yaml" />
   </node>
 
 </launch>
