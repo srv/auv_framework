@@ -8,63 +8,10 @@
 
   <!-- fugu_teleop_joy -->
   <node pkg="fugu_teleoperation" type="fugu_teleop_joy_node" name="fugu_teleop_joy_node" output="screen">
-
-    <param name="frame_id"     value="body-fixed" type="string" />
-
-    <param name="lin_x_step"   value="10.0" type="double" />
-    <param name="lin_x_factor" value="100.0" type="double" />
-
-    <param name="lin_y_step"   value="0.0" type="double" />
-    <param name="lin_y_factor" value="0.0" type="double" />
-
-    <param name="lin_z_step"   value="10.0" type="double" />
-    <param name="lin_z_factor" value="100.0" type="double" />
-
-
-    <param name="ang_x_step"   value="10.0" type="double" />
-    <param name="ang_x_factor" value="-100.0" type="double" />
-
-    <param name="ang_y_step"   value="0.0" type="double" />
-    <param name="ang_y_factor" value="0.0" type="double" />
-
-    <param name="ang_z_step"   value="10.0" type="double" />
-    <param name="ang_z_factor" value="-100.0" type="double" />
-
-
-    <param name="pause_bttn" value="3" type="int" />
-
-
-    <param name="lin_x_incrm_axis" value="1" type="int" />
-    <param name="lin_x_poffs_bttn" value="4" type="int" />
-    <param name="lin_x_noffs_bttn" value="6" type="int" />
-    <param name="lin_x_reset_bttn" value="10" type="int" />
-
-    <param name="lin_y_incrm_axis" value="-1" type="int" />
-    <param name="lin_y_poffs_bttn" value="-1" type="int" />
-    <param name="lin_y_noffs_bttn" value="-1" type="int" />
-    <param name="lin_y_reset_bttn" value="-1" type="int" />
-
-    <param name="lin_z_incrm_axis" value="3" type="int" />
-    <param name="lin_z_poffs_bttn" value="12" type="int" />
-    <param name="lin_z_noffs_bttn" value="14" type="int" />
-    <param name="lin_z_reset_bttn" value="11" type="int" />
-
-
-    <param name="ang_x_incrm_axis" value="2" type="int" />
-    <param name="ang_x_poffs_bttn" value="13" type="int" />
-    <param name="ang_x_noffs_bttn" value="15" type="int" />
-    <param name="ang_x_reset_bttn" value="9" type="int" />
-
-    <param name="ang_y_incrm_axis" value="-1" type="int" />
-    <param name="ang_y_poffs_bttn" value="-1" type="int" />
-    <param name="ang_y_noffs_bttn" value="-1" type="int" />
-    <param name="ang_y_reset_bttn" value="-1" type="int" />
-
-    <param name="ang_z_incrm_axis" value="0" type="int" />
-    <param name="ang_z_poffs_bttn" value="5" type="int" />
-    <param name="ang_z_noffs_bttn" value="7" type="int" />
-    <param name="ang_z_reset_bttn" value="8" type="int" />
-
+    <param name="policy_bttn" value="0" />
+    <rosparam param="motor_policy" file="$(find fugu_teleoperation)/launch/motor_policy_params.yaml" />
+    <rosparam param="wrench_policy" file="$(find fugu_teleoperation)/launch/wrench_policy_params.yaml" />
+    <rosparam param="twist_policy" file="$(find fugu_teleoperation)/launch/twist_policy_params.yaml" />
   </node>
 
 </launch>

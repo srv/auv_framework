@@ -17,6 +17,7 @@
   <depend package="control_common"/>
   <depend package="sensor_msgs"/>
   <depend package="joy"/>
+  <depend package="albatros_motorboard" />
 
   <export>
     <cpp cflags="-I${prefix}/include" 
