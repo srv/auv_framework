@@ -14,10 +14,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/fugu_teleoperation</url>
   <depend package="roscpp"/>
-  <depend package="control_common"/>
   <depend package="sensor_msgs"/>
-  <depend package="joy"/>
-  <depend package="albatros_motorboard" />
+  <depend package="srv_msgs"/>
+  <depend package="control_common"/>
+  <depend package="albatros_motor_board"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" 

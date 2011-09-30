@@ -208,7 +208,7 @@ void fugu_teleoperation::WrenchPolicy::update(const JoyState& j)
   if ( pause )
   {
     control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
-    msg->header.stamp = ros::Time::now();
+    msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = 0.0;
     msg->wrench.force.y = 0.0;
@@ -221,7 +221,7 @@ void fugu_teleoperation::WrenchPolicy::update(const JoyState& j)
   else if ( updated )
   {
     control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
-    msg->header.stamp = ros::Time::now();
+    msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = dof_state_[LIN_X].value_;
     msg->wrench.force.y = dof_state_[LIN_Y].value_;

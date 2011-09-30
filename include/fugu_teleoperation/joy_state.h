@@ -11,7 +11,7 @@
 #ifndef JOYSTATE_H
 #define JOYSTATE_H
 
-#include <joy/Joy.h>
+#include <sensor_msgs/Joy.h>
 #include <vector>
 
 namespace fugu_teleoperation
@@ -26,7 +26,7 @@ public:
 
   JoyState();
 
-  void update(const joy::JoyConstPtr& joy_msg);
+  void update(const sensor_msgs::JoyConstPtr& joy_msg);
 
   bool button(int i) const;         // true if the index is a valid button
   int buttonPosition(int i) const;  // 0 (pressed) or 1 (depressed)
@@ -37,6 +37,8 @@ public:
   bool axis(int i) const;           // true if the index is a valid axis
   float axisPosition(int i) const;  // position in [-1,1]
   bool axisMoved(int i) const;      // axis moved in last update
+
+  double stamp() const;             // time of last sample
 
 private:
 
@@ -56,6 +58,7 @@ private:
 
   std::vector<AxisState> axis_states_;
   std::vector<ButtonState> button_states_;
+  double stamp_;
 
 };
 

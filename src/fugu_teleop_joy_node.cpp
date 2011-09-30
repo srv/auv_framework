@@ -8,8 +8,8 @@
  */
 
 #include <ros/ros.h>
-#include <joy/Joy.h>
-#include <control_common/control_types.h>
+#include <sensor_msgs/Joy.h>
+
 #include "fugu_teleoperation/joy_state.h"
 #include "fugu_teleoperation/motor_policy.h"
 #include "fugu_teleoperation/wrench_policy.h"
@@ -37,7 +37,7 @@ private:
 
   int policy_bttn_;
   fugu_teleoperation::JoyState joy_state_;
-  void joyCallback(const joy::Joy::ConstPtr& joy);
+  void joyCallback(const sensor_msgs::JoyConstPtr& joy);
 };
 
 FuguTeleopJoyNode::FuguTeleopJoyNode()
@@ -79,11 +79,11 @@ void FuguTeleopJoyNode::changePolicy()
 
 void FuguTeleopJoyNode::subscribeTopics()
 {
-  joy_subs_ = nh_.subscribe<joy::Joy>("joy", 10,
-                                      &FuguTeleopJoyNode::joyCallback, this);
+  joy_subs_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10,
+                                              &FuguTeleopJoyNode::joyCallback, this);
 }
 
-void FuguTeleopJoyNode::joyCallback(const joy::Joy::ConstPtr& joy)
+void FuguTeleopJoyNode::joyCallback(const sensor_msgs::JoyConstPtr& joy)
 {
   joy_state_.update(joy);
   if (joy_state_.buttonPressed(policy_bttn_))
