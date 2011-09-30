@@ -17,7 +17,7 @@
  *
  * @par Published topics
  *
- *   - @b motor_levels (control_common/MotorLevelsStamped)
+ *   - @b motor_levels (srv_msgs/MotorLevels)
  *   motor levels with the current time stamp.
  *
  * @par Parameters
@@ -56,8 +56,8 @@
  */
 
 #include "fugu_teleoperation/motor_policy.h"
-#include <albatros_motorboard/motorboardctrl.h>
-#include <control_common/control_types.h>
+#include <albatros_motor_board/motorboardctrl.h>
+#include <srv_msgs/MotorLevels.h>
 #include <string>
 
 
@@ -120,7 +120,7 @@ void fugu_teleoperation::MotorPolicy::initParams()
 void fugu_teleoperation::MotorPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation motor levels...");
-  publ_ = nh_.advertise<control_common::MotorLevelsStamped>("motor_levels", 10);
+  publ_ = nh_.advertise<srv_msgs::MotorLevels>("motor_levels", 10);
 }
 
 
@@ -156,10 +156,10 @@ void fugu_teleoperation::MotorPolicy::start()
     for (int j=0; j<NUM_MOTORS; j++)
       pair_states_[i].motors_[j] = 0.0;
   }
-  control_common::MotorLevelsStampedPtr msg(new control_common::MotorLevelsStamped());
+  srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
-  msg->motor_levels.levels.resize(albatros_motorboard::MotorBoardCtrl::NUM_MOTORS,0.0);
+  msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);
   publ_.publish(msg);
 }
 
@@ -241,24 +241,24 @@ void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
   bool pause = j.buttonPressed(pause_bttn_);
   if ( pause )
   {
-    control_common::MotorLevelsStampedPtr msg(new control_common::MotorLevelsStamped());
-    msg->header.stamp = ros::Time::now();
+    srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+    msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
-    msg->motor_levels.levels.resize(albatros_motorboard::MotorBoardCtrl::NUM_MOTORS,0.0);
+    msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);
     publ_.publish(msg);
   }
   else if ( updated )
   {
-    control_common::MotorLevelsStampedPtr msg(new control_common::MotorLevelsStamped());
-    msg->header.stamp = ros::Time::now();
-    msg->motor_levels.levels.resize(albatros_motorboard::MotorBoardCtrl::NUM_MOTORS);
-    msg->motor_levels.levels[albatros_motorboard::MotorBoardCtrl::FORWARD_LEFT] =
+    srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+    msg->header.stamp = ros::Time(j.stamp());
+    msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS);
+    msg->levels[albatros_motor_board::MotorBoardCtrl::FORWARD_LEFT] =
         pair_states_[FORWARD].motors_[LEFT];
-    msg->motor_levels.levels[albatros_motorboard::MotorBoardCtrl::FORWARD_RIGHT] =
+    msg->levels[albatros_motor_board::MotorBoardCtrl::FORWARD_RIGHT] =
         pair_states_[FORWARD].motors_[RIGHT];
-    msg->motor_levels.levels[albatros_motorboard::MotorBoardCtrl::DOWNWARD_LEFT] =
+    msg->levels[albatros_motor_board::MotorBoardCtrl::DOWNWARD_LEFT] =
         pair_states_[DOWNWARD].motors_[LEFT];
-    msg->motor_levels.levels[albatros_motorboard::MotorBoardCtrl::DOWNWARD_RIGHT] =
+    msg->levels[albatros_motor_board::MotorBoardCtrl::DOWNWARD_RIGHT] =
         pair_states_[DOWNWARD].motors_[RIGHT];
     publ_.publish(msg);
   }
@@ -271,10 +271,10 @@ void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
 void fugu_teleoperation::MotorPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on motor policy stop...");
-  control_common::MotorLevelsStampedPtr msg(new control_common::MotorLevelsStamped());
+  srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
-  msg->motor_levels.levels.resize(albatros_motorboard::MotorBoardCtrl::NUM_MOTORS,0.0);
+  msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);
   publ_.publish(msg);
 }
 

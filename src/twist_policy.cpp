@@ -199,7 +199,7 @@ void fugu_teleoperation::TwistPolicy::update(const JoyState& j)
   if ( pause )
   {
     control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-    msg->header.stamp = ros::Time::now();
+    msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->twist.linear.x = 0.0;
     msg->twist.linear.y = 0.0;
@@ -212,7 +212,7 @@ void fugu_teleoperation::TwistPolicy::update(const JoyState& j)
   else if ( updated )
   {
     control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-    msg->header.stamp = ros::Time::now();
+    msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->twist.linear.x = dof_state_[LIN_X].value_;
     msg->twist.linear.y = dof_state_[LIN_Y].value_;

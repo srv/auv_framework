@@ -31,6 +31,7 @@ fugu_teleoperation::JoyState::ButtonState::ButtonState()
  * @return
  */
 fugu_teleoperation::JoyState::JoyState()
+: stamp_(0.0)
 {}
 
 /** Update axes and buttons state from message.
@@ -47,7 +48,7 @@ fugu_teleoperation::JoyState::JoyState()
  *
  * @param joy_msg message to update the state from.
  */
-void fugu_teleoperation::JoyState::update(const joy::JoyConstPtr& joy_msg)
+void fugu_teleoperation::JoyState::update(const sensor_msgs::JoyConstPtr& joy_msg)
 {
   const int num_axes = joy_msg->axes.size();
   axis_states_.resize(num_axes);
@@ -78,6 +79,10 @@ void fugu_teleoperation::JoyState::update(const joy::JoyConstPtr& joy_msg)
       button_states_[i].moved_ = false;
     }
   }
+
+  stamp_ = ( joy_msg->header.stamp.isValid() )
+              ? joy_msg->header.stamp.toSec()
+              : ros::Time::now().toSec();
 }
 
 /** Check if a button index is valid in the current state.
@@ -178,4 +183,13 @@ bool fugu_teleoperation::JoyState::axisMoved(int i) const
     return axis_states_[i].moved_;
   else
     return false;
+}
+
+/** Get state time stamp.
+ *
+ * @return time stamp of last sample.
+ */
+double fugu_teleoperation::JoyState::stamp() const
+{
+  return stamp_;
 }
