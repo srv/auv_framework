@@ -56,7 +56,7 @@
  */
 
 #include "fugu_teleoperation/motor_policy.h"
-#include <albatros_motor_board/motorboardctrl.h>
+#include <albatros_motor_board/motor_board_ctrl.h>
 #include <srv_msgs/MotorLevels.h>
 #include <string>
 
