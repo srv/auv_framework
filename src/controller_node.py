@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-PACKAGE = 'altitude_controller'
+PACKAGE = 'auv_control'
 
 import roslib; roslib.load_manifest(PACKAGE)
 import rospy
