@@ -1,96 +1,59 @@
-## {{{ http://code.activestate.com/recipes/577231/ (r1)
-# The recipe gives simple implementation of a Discrete 
+# Simple implementation of a Discrete 
 # Proportional-Integral-Derivative (PID) controller. 
 # PID controller gives output value for error between 
 # desired reference input and measurement feedback to minimize error value.
 # More information: http://en.wikipedia.org/wiki/PID_controller
 #
-#cnr437@gmail.com
-#
 #######    Example    #########
 #
-#p=PID(3.0,0.4,1.2)
-#p.setPoint(5.0)
-#while True:
-#     pid = p.update(measurement_value)
-#
-#
+# pid = Pid(1.5, 0.2, 0.0, -10.0, 10.0)
+# pid.setSetPoint(5.0)
+# while True:
+#     # get your measurement
+#     output = pid.update(measurement_value)
 
+def clamp(value, min_value, max_value):
+    if value > max_value:
+        return max_value
+    if value < min_value:
+        return min_value
+    return value
 
-class PID:
+class Pid:
     """
     Discrete PID control
     """
+    def __init__(self, k_p, k_i, k_d, max_output, min_output):
+        self.k_p = k_p
+        self.k_i = k_i
+        self.k_d = k_d
+        self.max_output = max_output
+        self.min_output = min_output
+        self.setSetpoint(0.0)
 
-    def __init__(self, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
-
-        self.Kp=P
-        self.Ki=I
-        self.Kd=D
-        self.Derivator=Derivator
-        self.Integrator=Integrator
-        self.Integrator_max=Integrator_max
-        self.Integrator_min=Integrator_min
-
-        self.set_point=0.0
-        self.error=0.0
-
-    def update(self,current_value):
+    def update(self, feedback_value, dt):
         """
-        Calculate PID output value for given reference input and feedback
+        Calculate PID output value for stored reference input (setpoint) and 
+        feedback using the time passed dt.
         """
+        error = self.setpoint - feedback_value
+        self.integral = self.integral + error * dt
+        derivative = (error - self.previous_error) / dt
+        output = self.k_p * error + self.k_i * self.integral + self.k_d * derivative
 
-        self.error = self.set_point - current_value
+        self.previous_error = error
+        return clamp(output, self.min_output, self.max_output)
 
-        self.P_value = self.Kp * self.error
-        self.D_value = self.Kd * ( self.error - self.Derivator)
-        self.Derivator = self.error
-
-        self.Integrator = self.Integrator + self.error
-
-        if self.Integrator > self.Integrator_max:
-            self.Integrator = self.Integrator_max
-        elif self.Integrator < self.Integrator_min:
-            self.Integrator = self.Integrator_min
-
-        self.I_value = self.Integrator * self.Ki
-
-        PID = self.P_value + self.I_value + self.D_value
-
-        return PID
-
-    def setPoint(self,set_point):
+    def setSetpoint(self, setpoint):
         """
         Initilize the setpoint of PID
         """
-        self.set_point = set_point
-        self.Integrator=0
-        self.Derivator=0
+        self.setpoint = setpoint
+        self.integral = 0.0
+        self.previous_error = 0.0
 
-    def setIntegrator(self, Integrator):
-        self.Integrator = Integrator
+    def setConstants(self, k_p, k_i, k_d):
+        self.k_p = k_p
+        self.k_i = k_i
+        self.k_d = k_d
 
-    def setDerivator(self, Derivator):
-        self.Derivator = Derivator
-
-    def setKp(self,P):
-        self.Kp=P
-
-    def setKi(self,I):
-        self.Ki=I
-
-    def setKd(self,D):
-        self.Kd=D
-
-    def getPoint(self):
-        return self.set_point
-
-    def getError(self):
-        return self.error
-
-    def getIntegrator(self):
-        return self.Integrator
-
-    def getDerivator(self):
-        return self.Derivator
-## end of http://code.activestate.com/recipes/577231/ }}}
