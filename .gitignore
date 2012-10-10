@@ -7,14 +7,12 @@ cfg/*.cfgc
 CMakeFiles/
 msg_gen/
 src/*_msgs/msg/_*.py
-src/*_msgs/msg/_*.pyc
 src/*_msgs/_*.py
-src/*_msgs/_*.pyc
 msg/lisp/
 doc/*/html/
 doc/*.html
 doc/*.css
-scripts/*.pyc
+*.pyc
 
 # eclipse temporary files
 .cproject
