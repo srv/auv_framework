@@ -9,6 +9,12 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/auv_control</url>
   <depend package="rospy"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="srv_msgs"/>
+  <depend package="roslib"/>
+  <depend package="driver_base"/>
 
 </package>
 
