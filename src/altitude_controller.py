@@ -9,7 +9,7 @@ from auv_control.cfg import AltitudeControllerConfig
 from pid import Pid
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
-from geometry_msgs.msg import Wrench,WrenchStamped
+from geometry_msgs.msg import WrenchStamped
 
 class AltitudeControllerNode():
     """
@@ -18,7 +18,7 @@ class AltitudeControllerNode():
     other values have to be given by some other input, e.g. via joystick.
 
     This node subscribes to 'altitude', expecting a sensor_msgs/Range message
-    and to 'wrench_input' which should be of type geometry_msgs/Wrench.
+    and to 'wrench_input' which should be of type geometry_msgs/WrenchStamped.
     The node also receives std_msgs/Float32 messages on the topic 
     'altitude_request' to define the required altitude (setpoint).
     The node then calculates the force in z needed to control the AUV to
@@ -29,12 +29,12 @@ class AltitudeControllerNode():
     using dynamic_reconfigure.
     """
     def __init__(self, frequency, k_p, k_i, k_d):
-        self.wrench_input = Wrench()
+        self.wrench_input = WrenchStamped()
         self.started = False;
         self.pid = Pid(k_p, k_i, k_d)
         self.server = dynamic_reconfigure.server.Server(AltitudeControllerConfig, self.reconfigure)
         
-        self.pub = rospy.Publisher('wrench_output', Wrench)
+        self.pub = rospy.Publisher('wrench_output', WrenchStamped)
         
         rospy.Subscriber('wrench_input', WrenchStamped, self.wrenchInputCallback)
         rospy.Subscriber('altitude_request', Float32, self.setpointCallback)
@@ -72,7 +72,7 @@ class AltitudeControllerNode():
         if self.started:
             wrench_output = self.wrench_input
             dt = (event.current_real - event.last_real).toSec()
-            wrench_output.force.z = self.pid.update(self.current_altitude, dt)
+            wrench_output.wrench.force.z = self.pid.update(self.current_altitude, dt)
             self.pub.publish(wrench_output)
         else:
             rospy.loginfo('Waiting for altitude feedback to be published on '
