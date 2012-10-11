@@ -15,6 +15,7 @@
   <depend package="srv_msgs"/>
   <depend package="roslib"/>
   <depend package="driver_base"/>
+  <depend package="sensor_msgs"/>
 
 </package>
 
