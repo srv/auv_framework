@@ -5,7 +5,7 @@ PACKAGE = 'auv_control'
 import roslib; roslib.load_manifest(PACKAGE)
 import rospy
 import dynamic_reconfigure.server
-from altitude_controller.cfg import AltitudeControllerConfig
+from auv_control.cfg import AltitudeControllerConfig
 from pid import Pid
 from sensor_msgs.msg import Range
 from geometry_msgs.msg import Wrench
@@ -27,10 +27,10 @@ class AltitudeControllerNode():
     Internally a simple PID is used for control, its variables can be modified
     using dynamic_reconfigure.
     """
-    def __init__(self, frequency, min_force, max_force, k_p, k_i, k_d):
+    def __init__(self, frequency, k_p, k_i, k_d):
         self.wrench_input = Wrench()
         self.started = False;
-        self.pid = pid(k_p, k_i, k_d, min_force, max_force)
+        self.pid = pid(k_p, k_i, k_d)
         self.server = dynamic_reconfigure.server.Server(AltitudeControllerConfig, self.reconfigure)
         
         self.pub = rospy.Publisher('wrench_output', Wrench)
@@ -41,12 +41,15 @@ class AltitudeControllerNode():
         period = rospy.rostime.Duration.from_sec(1.0/frequency)
         self.timer = rospy.Timer(period, self.updateOutput)
         
-        rospy.Subscriber('altitude', Float32, self.altitudeCallback)
+        rospy.Subscriber('altitude', Range, self.altitudeCallback)
         
     def reconfigure(self, config, level):
         rospy.loginfo("Reconfigure request...")
-        self.pid.setConstants(config['Kp'], config['Ki'], config['Kd'])
-        rospy.loginfo("Reconfigured!")
+        self.pid.k_p = config['Kp']
+        self.pid.k_i = config['Ki']
+        self.pid.k_d = config['Kd']
+        rospy.loginfo("Reconfigured to (Kp, Ki, Kd) = (%f, %f, %f)", 
+                self.pid.k_p, self.pid.k_i, self.pid.k_d)
         return config # Returns the updated configuration.
     
     def setpointCallback(self,setpoint):
@@ -56,8 +59,8 @@ class AltitudeControllerNode():
         rospy.loginfo('Changed setpoint to: %s', setpoint.data)
         self.pid.setSetpoint(setpoint.data)
 
-    def altitudeCallback(self, altitude):
-        self.current_altitude = altitude.data
+    def altitudeCallback(self, range_msg):
+        self.current_altitude = range_msg.range
         if not self.started:
             self.started = True
         
@@ -71,19 +74,30 @@ class AltitudeControllerNode():
             wrench_output.force.z = self.pid.update(self.current_altitude, dt)
             self.pub.publish(wrench_output)
         else:
-            rospy.loginfo('Waiting topics to be published...')
+            rospy.loginfo('Waiting for altitude feedback to be published on '
+                          '%s...', rospy.resolve_name('altitude'))
 
 if __name__ == "__main__":
     rospy.init_node('altitude_controller')
     try:
         frequency = rospy.get_param("~frequency", 10.0)
-        min_force = rospy.get_param("~min_force", -100.0);
-        max_force = rospy.get_param("~max_force",  100.0);
         k_p = rospy.get_param("~Kp",  0.0);
         k_i = rospy.get_param("~Ki",  0.0);
         k_d = rospy.get_param("~Kd",  0.0);
+        rospy.loginfo('Starting altitude control with the following settings: \n'
+                      '     frequency: %f \n'
+                      '            Kp: %f \n'
+                      '            Ki: %f \n'
+                      '            Kd: %f \n'
+                      '      altitude: %s \n'
+                      '  wrench_input: %s \n'
+                      ' wrench_output: %s \n', frequency, k_p, k_i, k_d,
+                      rospy.resolve_name('altitude'), 
+                      rospy.resolve_name('wrench_input'),
+                      rospy.resolve_name('wrench_output'))
+
         node = AltitudeControllerNode(
-                frequency, min_force, max_force, k_p, k_i, k_d)
+                frequency, k_p, k_i, k_d)
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
