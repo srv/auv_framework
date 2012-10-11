@@ -8,7 +8,8 @@ import dynamic_reconfigure.server
 from auv_control.cfg import AltitudeControllerConfig
 from pid import Pid
 from sensor_msgs.msg import Range
-from geometry_msgs.msg import Wrench
+from std_msgs.msg import Float32
+from geometry_msgs.msg import Wrench,WrenchStamped
 
 class AltitudeControllerNode():
     """
@@ -30,7 +31,7 @@ class AltitudeControllerNode():
     def __init__(self, frequency, k_p, k_i, k_d):
         self.wrench_input = Wrench()
         self.started = False;
-        self.pid = pid(k_p, k_i, k_d)
+        self.pid = Pid(k_p, k_i, k_d)
         self.server = dynamic_reconfigure.server.Server(AltitudeControllerConfig, self.reconfigure)
         
         self.pub = rospy.Publisher('wrench_output', Wrench)
