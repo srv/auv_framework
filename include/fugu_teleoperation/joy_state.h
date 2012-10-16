@@ -29,7 +29,7 @@ public:
   void update(const sensor_msgs::JoyConstPtr& joy_msg);
 
   bool button(int i) const;         // true if the index is a valid button
-  int buttonPosition(int i) const;  // 0 (pressed) or 1 (depressed)
+  int buttonPosition(int i) const;  // 0 (pressed) or 1 (released)
   bool buttonMoved(int i) const;    // button moved in last update
   bool buttonPressed(int i) const;  // button pressed in last update
   bool buttonReleased(int i) const; // button released in last update
