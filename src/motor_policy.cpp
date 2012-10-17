@@ -147,7 +147,7 @@ void fugu_teleoperation::MotorPolicy::start()
   ROS_INFO_STREAM("Initializing motor policy states...");
   for (int i=0; i<NUM_PAIRS; i++)
   {
-    for (int j=0; i<NUM_SPEEDS; i++)
+    for (int j=0; j<NUM_SPEEDS; j++)
     {
       pair_states_[i].speeds_[j].incrm_ = 0.0;
       pair_states_[i].speeds_[j].offst_ = 0.0;
