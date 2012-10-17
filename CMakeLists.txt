@@ -35,6 +35,7 @@ rosbuild_add_executable(fugu_teleop_joy_node
                           src/fugu_teleop_joy_node.cpp
                           src/motor_policy.cpp
                           src/wrench_policy.cpp
+                          src/altitude_control_wrench_policy.cpp
                           src/twist_policy.cpp
 )
 target_link_libraries(fugu_teleop_joy_node joy_state)

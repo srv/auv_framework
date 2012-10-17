@@ -18,6 +18,8 @@
   <depend package="srv_msgs"/>
   <depend package="control_common"/>
   <depend package="albatros_motor_board"/>
+  <depend package="std_msgs"/>
+  <depend package="auv_control"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" 
