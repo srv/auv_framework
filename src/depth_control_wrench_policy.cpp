@@ -1,5 +1,5 @@
 /**
- * @file altitude_control_wrench_policy.cpp
+ * @file depth_control_wrench_policy.cpp
  * @brief Wrench teleoperation policy implementation.
  * @author Stephan Wirth
  * @date 2012-10-16
@@ -9,26 +9,26 @@
 #include <std_msgs/Float32.h>
 #include <auv_control/EnableControl.h>
 
-#include "fugu_teleoperation/altitude_control_wrench_policy.h"
+#include "fugu_teleoperation/depth_control_wrench_policy.h"
 #include "control_common/control_types.h"
 
-fugu_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(const ros::NodeHandle& n,
+fugu_teleoperation::DepthControlWrenchPolicy::DepthControlWrenchPolicy(const ros::NodeHandle& n,
                                                const ros::NodeHandle& p)
 {
   nh_ = n;
-  priv_ = ros::NodeHandle(p,"altitude_control_wrench_policy");
+  priv_ = ros::NodeHandle(p,"depth_control_wrench_policy");
 }
 
 
 /** Set parameters from parameter server.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::initParams()
+void fugu_teleoperation::DepthControlWrenchPolicy::initParams()
 {
   ROS_INFO_STREAM("Setting wrench policy mapping and parameters...");
   std::string dof_names[NUM_DOFS];
   dof_names[LINEAR_X] = "linear_x";
   dof_names[LINEAR_Y] = "linear_y";
-  dof_names[ALTITUDE] = "altitude";
+  dof_names[DEPTH] = "depth";
   dof_names[ANGULAR_X] = "angular_x";
   dof_names[ANGULAR_Y] = "angular_y";
   dof_names[ANGULAR_Z] = "angular_z";
@@ -57,17 +57,17 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::initParams()
 }
 
 
-void fugu_teleoperation::AltitudeControlWrenchPolicy::advertiseTopics()
+void fugu_teleoperation::DepthControlWrenchPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation wrench request...");
   wrench_pub_ = priv_.advertise<geometry_msgs::WrenchStamped>("wrench_request", 10);
   bool latched = true;
-  altitude_request_pub_ = priv_.advertise<std_msgs::Float32>("altitude_request", 1, latched);
+  depth_request_pub_ = priv_.advertise<std_msgs::Float32>("depth_request", 1, latched);
 
 }
 
 
-void fugu_teleoperation::AltitudeControlWrenchPolicy::init()
+void fugu_teleoperation::DepthControlWrenchPolicy::init()
 {
   initParams();
   advertiseTopics();
@@ -78,9 +78,9 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::init()
  *
  * Reset wrench levels to null state.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::start()
+void fugu_teleoperation::DepthControlWrenchPolicy::start()
 {
-  ROS_INFO_STREAM("Initializing altitude control wrench policy states...");
+  ROS_INFO_STREAM("Initializing depth control wrench policy states...");
   for (int i=0; i<NUM_DOFS; i++)
   {
     dof_state_[i].offset_ = 0.0;
@@ -97,28 +97,28 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::start()
   msg.wrench.torque.z = 0.0;
   wrench_pub_.publish(msg);
 
-  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_altitude_control");
+  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_depth_control");
   auv_control::EnableControl control_service;
   control_service.request.enable = true;
   if (client.call(control_service))
   {
     if (control_service.response.enabled)
     {
-      ROS_INFO("Altitude control enabled.");
-      dof_state_[ALTITUDE].offset_ = control_service.response.current_setpoint;
+      ROS_INFO("Depth control enabled.");
+      dof_state_[DEPTH].offset_ = control_service.response.current_setpoint;
     }
     else
     {
-      ROS_ERROR("Failed to enable altitude control!");
+      ROS_ERROR("Failed to enable depth control!");
     }
   }
   else
   {
-    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_altitude_control").c_str());
+    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_depth_control").c_str());
   }
 }
 
-bool fugu_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
+bool fugu_teleoperation::DepthControlWrenchPolicy::updateDOFState(
     DOFState& d,
     const DOFMapping& m,
     const JoyState& j)
@@ -160,20 +160,20 @@ bool fugu_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
  *
  * @param j joystick state.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
+void fugu_teleoperation::DepthControlWrenchPolicy::update(const JoyState& j)
 {
   bool updated = false;
   for (int i=0; i<NUM_DOFS; i++)
   {
-    if (i != ALTITUDE)
+    if (i != DEPTH)
     {
       if ( updateDOFState(dof_state_[i], dof_map_[i], j) )
         updated = true;
     }
   }
-  bool altitude_updated = false;
-  if ( updateDOFState(dof_state_[ALTITUDE], dof_map_[ALTITUDE], j) )
-    altitude_updated = true;
+  bool depth_updated = false;
+  if ( updateDOFState(dof_state_[DEPTH], dof_map_[DEPTH], j) )
+    depth_updated = true;
 
   bool pause = j.buttonPressed(pause_button_);
   if ( pause )
@@ -201,11 +201,11 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
     msg->wrench.torque.z = dof_state_[ANGULAR_Z].offset_ + dof_state_[ANGULAR_Z].value_;
     wrench_pub_.publish(msg);
   }
-  if ( altitude_updated )
+  if ( depth_updated )
   {
-    std_msgs::Float32 altitude_request_msg;
-    altitude_request_msg.data = dof_state_[ALTITUDE].offset_ + dof_state_[ALTITUDE].value_;
-    altitude_request_pub_.publish(altitude_request_msg);
+    std_msgs::Float32 depth_request_msg;
+    depth_request_msg.data = dof_state_[DEPTH].offset_ + dof_state_[DEPTH].value_;
+    depth_request_pub_.publish(depth_request_msg);
   }
 }
 
@@ -214,7 +214,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
  *
  * Send a wrench levels message with null wrench for every DOF.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::stop()
+void fugu_teleoperation::DepthControlWrenchPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on wrench policy stop...");
   control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
@@ -228,23 +228,23 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::stop()
   msg->wrench.torque.z = 0.0;
   wrench_pub_.publish(msg);
 
-  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_altitude_control");
+  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_depth_control");
   auv_control::EnableControl control_service;
   control_service.request.enable = false;
   if (client.call(control_service))
   {
     if (!control_service.response.enabled)
     {
-      ROS_INFO("Altitude control disabled.");
+      ROS_INFO("Depth control disabled.");
     }
     else
     {
-      ROS_ERROR("Failed to disable altitude control!");
+      ROS_ERROR("Failed to disable depth control!");
     }
   }
   else
   {
-    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_altitude_control").c_str());
+    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_depth_control").c_str());
   }
 }
 
