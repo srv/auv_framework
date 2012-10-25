@@ -1,0 +1,9 @@
+<stack>
+  <description brief="auv_framework">Stack </description>
+  <author>Maintained by Stephan Wirth and Miquel Massot</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/auv_framework</url>
+  <depend stack="ros" />
+
+</stack>
