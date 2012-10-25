@@ -1,0 +1,9 @@
+# Service to enable or disable any kind of control.
+
+# Request to enable/disable
+bool enable
+---
+# Response is current status (after processing the request)
+bool enabled
+float32 current_setpoint
+

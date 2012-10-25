@@ -1,0 +1,25 @@
+# directories created by ros
+lib/
+bin/
+build/
+cfg/cpp/
+cfg/*.cfgc
+CMakeFiles/
+msg_gen/
+src/*_msgs/msg/_*.py
+src/*_msgs/_*.py
+msg/lisp/
+doc/*/html/
+doc/*.html
+doc/*.css
+*.pyc
+
+# eclipse temporary files
+.cproject
+.project
+.pydevproject
+
+# CMake temporary files
+CMakeCache.txt
+cmake_install.cmake
+

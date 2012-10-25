@@ -1,0 +1,22 @@
+<package>
+  <description brief="auv_control">
+
+     auv_control
+
+  </description>
+  <author>Stephan Wirth</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/auv_control</url>
+  <depend package="rospy"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="srv_msgs"/>
+  <depend package="roslib"/>
+  <depend package="driver_base"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
