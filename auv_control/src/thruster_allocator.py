@@ -29,6 +29,7 @@ class ThrusterAllocationNode():
                       '%s...', rospy.resolve_name('~wrench'))
         rospy.loginfo('Publishing motor levels on '
                       '%s...', rospy.resolve_name('~motor_levels'))
+        rospy.loginfo('Thruster allocation matrix:\n %s', str(self.tam))
         self.signed_sqrt_v = numpy.vectorize(self.signed_sqrt)
 
     def signed_sqrt(self, number):
@@ -50,8 +51,11 @@ class ThrusterAllocationNode():
         self.pub.publish(motor_levels_msg)
 
 if __name__ == "__main__":
-    rospy.init_node('thruster_allocator')
-    taminfo = rospy.get_param("~thruster_allocation_matrix")
-    tam = numpy.array(taminfo['data']).reshape(taminfo['rows'], taminfo['cols'])
-    node = ThrusterAllocationNode(tam)
-    rospy.spin()
+    try:
+        rospy.init_node('thruster_allocator')
+        taminfo = rospy.get_param("~thruster_allocation_matrix")
+        tam = numpy.array(map(float, taminfo['data'])).reshape(taminfo['rows'], taminfo['cols'])
+        node = ThrusterAllocationNode(tam)
+        rospy.spin()
+    except KeyError as e:
+        rospy.logerr("Parameter %s not set!", e)
