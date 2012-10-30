@@ -23,12 +23,12 @@ class ThrusterAllocationNode():
     """
     def __init__(self, tam):
         self.tam = tam
-        rospy.Subscriber('~wrench', WrenchStamped, self.wrenchCallback)
-        self.pub = rospy.Publisher('~motor_levels', MotorLevels)
+        rospy.Subscriber('wrench', WrenchStamped, self.wrenchCallback)
+        self.pub = rospy.Publisher('motor_levels', MotorLevels)
         rospy.loginfo('Listening for wrench requests on '
-                      '%s...', rospy.resolve_name('~wrench'))
+                      '%s...', rospy.resolve_name('wrench'))
         rospy.loginfo('Publishing motor levels on '
-                      '%s...', rospy.resolve_name('~motor_levels'))
+                      '%s...', rospy.resolve_name('motor_levels'))
         rospy.loginfo('Thruster allocation matrix:\n %s', str(self.tam))
         self.signed_sqrt_v = numpy.vectorize(self.signed_sqrt)
 
