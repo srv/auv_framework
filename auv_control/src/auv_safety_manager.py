@@ -115,19 +115,17 @@ class TopicMonitor(object):
     The frequency is calculated as a mean over 10 messages.
     """
     def __init__(self, topic, frequency_limit, field_monitors):
+        self.SUBSCRIBING_TIMEOUT = 5.0
         self.error = None
+        self.sub = None
         self.WINDOW_SIZE = 10
         self.topic = topic
         self.frequency_limit = frequency_limit
         self.field_monitors = field_monitors
         self.start_time = rospy.Time.now()
         self.message_times = []
-        topic_type, real_topic, _ = rostopic.get_topic_type(topic, blocking=True)
-        print repr(topic_type), real_topic
-        data_class = roslib.message.get_message_class(topic_type)
-        self.sub = rospy.Subscriber(real_topic, data_class, self._message_callback)
         timer_duration = rospy.rostime.Duration.from_sec(1.0)
-        self.timer = rospy.Timer(timer_duration, self._check_frequency)
+        self.topic_timer = rospy.Timer(timer_duration, self._check_subscribe_topic)
 
     @classmethod
     def create(cls, params):
@@ -161,6 +159,18 @@ class TopicMonitor(object):
                 field_monitor.check(msg)
         except FieldLimitError as e:
             self.error = e
+
+    def _check_subscribe_topic(self, event):
+        if not self.sub:
+            topic_type, real_topic, _ = rostopic.get_topic_type(self.topic, blocking=False)
+            if not topic_type and \
+                    (rospy.Time.now() - self.start_time).to_sec() > self.SUBSCRIBING_TIMEOUT:
+                self.error = "Monitored topic " + self.topic + " not available!"
+            elif topic_type:
+                data_class = roslib.message.get_message_class(topic_type)
+                self.sub = rospy.Subscriber(real_topic, data_class, self._message_callback)
+                timer_duration = rospy.rostime.Duration.from_sec(1.0)
+                self.frequency_timer = rospy.Timer(timer_duration, self._check_frequency)
 
     def _check_frequency(self, event):
         if self.message_times:
