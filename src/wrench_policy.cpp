@@ -102,8 +102,8 @@ void fugu_teleoperation::WrenchPolicy::initParams()
  */
 void fugu_teleoperation::WrenchPolicy::advertiseTopics()
 {
-  ROS_INFO_STREAM("Advertising teleoperation wrench levels...");
-  publ_ = nh_.advertise<control_common::WrenchLevelsStamped>("wrench_levels", 10);
+  ROS_INFO_STREAM("Advertising teleoperation wrench...");
+  publ_ = nh_.advertise<control_common::WrenchLevelsStamped>("wrench", 10);
 }
 
 
