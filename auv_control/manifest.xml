@@ -9,6 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/auv_control</url>
   <depend package="auv_control_msgs"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="rospy"/>
 
 </package>
 

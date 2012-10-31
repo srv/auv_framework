@@ -6,7 +6,7 @@ import roslib; roslib.load_manifest(PACKAGE)
 import rospy
 import dynamic_reconfigure.server
 import copy
-import auv_control.srv
+import auv_control_msgs.srv
 from auv_control.cfg import AltitudeControllerConfig
 from pid import Pid
 from sensor_msgs.msg import Range
@@ -40,7 +40,7 @@ class AltitudeControllerNode():
         self.feedback_received = False
         self.enabled = False
         self.last_feedback = Range()
-        self.enable_server = rospy.Service('~enable', auv_control.srv.EnableControl, self.enable)
+        self.enable_server = rospy.Service('~enable', auv_control_msgs.srv.EnableControl, self.enable)
         self.pid = Pid(0.0, 0.0, 0.0) # the right constants will
         self.k_f = 0.0                # be set through dynamic reconfigure
         self.server = dynamic_reconfigure.server.Server(AltitudeControllerConfig, self.reconfigure)
