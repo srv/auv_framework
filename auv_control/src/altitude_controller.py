@@ -64,7 +64,7 @@ class AltitudeControllerNode():
         Handles ROS service requests for enabling/disabling control.
         Returns current enabled status and setpoint.
         """
-        response = auv_control.srv.EnableControlResponse()
+        response = auv_control_msgs.srv.EnableControlResponse()
         if request.enable:
             if self.isFeedbackValid():
                 self.enabled = True
