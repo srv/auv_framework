@@ -12,6 +12,7 @@
   <depend package="dynamic_reconfigure"/>
   <depend package="rospy"/>
   <depend package="driver_base"/>
+  <depend package="srv_msgs"/>
 
 </package>
 
