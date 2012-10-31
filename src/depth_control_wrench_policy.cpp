@@ -106,6 +106,7 @@ void fugu_teleoperation::DepthControlWrenchPolicy::start()
     {
       ROS_INFO("Depth control enabled.");
       dof_state_[DEPTH].offset_ = control_service.response.current_setpoint;
+      ROS_INFO("Setpoint set to %f", dof_state_[DEPTH].offset_);
     }
     else
     {
@@ -205,6 +206,7 @@ void fugu_teleoperation::DepthControlWrenchPolicy::update(const JoyState& j)
   {
     std_msgs::Float32 depth_request_msg;
     depth_request_msg.data = dof_state_[DEPTH].offset_ + dof_state_[DEPTH].value_;
+    ROS_INFO("Sending depth request: %f", depth_request_msg.data);
     depth_request_pub_.publish(depth_request_msg);
   }
 }
