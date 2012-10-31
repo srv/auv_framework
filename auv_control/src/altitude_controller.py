@@ -34,7 +34,7 @@ class AltitudeControllerNode():
     it is disabled. Enabling sets the setpoint to the current altitude.
     """
     def __init__(self, frequency):
-        self.FEEDBACK_TIMEOUT = 0.5 # half a second
+        self.FEEDBACK_TIMEOUT = 2.0
         self.wrench_input = WrenchStamped()
         self.setpoint_valid = False
         self.feedback_received = False
