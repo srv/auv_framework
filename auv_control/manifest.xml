@@ -11,6 +11,7 @@
   <depend package="auv_control_msgs"/>
   <depend package="dynamic_reconfigure"/>
   <depend package="rospy"/>
+  <depend package="driver_base"/>
 
 </package>
 
