@@ -19,7 +19,7 @@
   <depend package="control_common"/>
   <depend package="albatros_motor_board"/>
   <depend package="std_msgs"/>
-  <depend package="auv_control"/>
+  <depend package="auv_control_msgs"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" 

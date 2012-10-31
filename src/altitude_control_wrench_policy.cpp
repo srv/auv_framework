@@ -7,7 +7,7 @@
 
 #include <string>
 #include <std_msgs/Float32.h>
-#include <auv_control/EnableControl.h>
+#include <auv_control_msgs/EnableControl.h>
 
 #include "fugu_teleoperation/altitude_control_wrench_policy.h"
 #include "control_common/control_types.h"
@@ -97,8 +97,8 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::start()
   msg.wrench.torque.z = 0.0;
   wrench_pub_.publish(msg);
 
-  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_altitude_control");
-  auv_control::EnableControl control_service;
+  ros::ServiceClient client = nh_.serviceClient<auv_control_msgs::EnableControl>("enable_altitude_control");
+  auv_control_msgs::EnableControl control_service;
   control_service.request.enable = true;
   if (client.call(control_service))
   {
@@ -228,8 +228,8 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::stop()
   msg->wrench.torque.z = 0.0;
   wrench_pub_.publish(msg);
 
-  ros::ServiceClient client = nh_.serviceClient<auv_control::EnableControl>("enable_altitude_control");
-  auv_control::EnableControl control_service;
+  ros::ServiceClient client = nh_.serviceClient<auv_control_msgs::EnableControl>("enable_altitude_control");
+  auv_control_msgs::EnableControl control_service;
   control_service.request.enable = false;
   if (client.call(control_service))
   {
