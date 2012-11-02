@@ -17,7 +17,7 @@
  *
  * @par Published topics
  *
- *   - @b motor_levels (srv_msgs/MotorLevels)
+ *   - @b motor_levels (auv_control_msgs/MotorLevels)
  *   motor levels with the current time stamp.
  *
  * @par Parameters
@@ -55,9 +55,9 @@
  * - @b ~frame_id frame name for published messages
  */
 
-#include "fugu_teleoperation/motor_policy.h"
+#include "auv_teleoperation/motor_policy.h"
 #include <albatros_motor_board/motor_board_ctrl.h>
-#include <srv_msgs/MotorLevels.h>
+#include <auv_control_msgs/MotorLevels.h>
 #include <string>
 
 
@@ -70,7 +70,7 @@
  * @param p private namespace handle
  * @return
  */
-fugu_teleoperation::MotorPolicy::MotorPolicy(const ros::NodeHandle& n,
+auv_teleoperation::MotorPolicy::MotorPolicy(const ros::NodeHandle& n,
                                              const ros::NodeHandle& p)
 {
   nh_ = n;
@@ -80,7 +80,7 @@ fugu_teleoperation::MotorPolicy::MotorPolicy(const ros::NodeHandle& n,
 
 /** Set parameters from parameter server.
  */
-void fugu_teleoperation::MotorPolicy::initParams()
+void auv_teleoperation::MotorPolicy::initParams()
 {
   ROS_INFO_STREAM("Setting motor policy mapping and parameters...");
   std::string pair_prefix[NUM_PAIRS];
@@ -117,10 +117,10 @@ void fugu_teleoperation::MotorPolicy::initParams()
 
 /** Advertise motor levels topic.
  */
-void fugu_teleoperation::MotorPolicy::advertiseTopics()
+void auv_teleoperation::MotorPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation motor levels...");
-  publ_ = nh_.advertise<srv_msgs::MotorLevels>("motor_levels", 10);
+  publ_ = nh_.advertise<auv_control_msgs::MotorLevels>("motor_levels", 10);
 }
 
 
@@ -128,7 +128,7 @@ void fugu_teleoperation::MotorPolicy::advertiseTopics()
  *
  * Initialize parameters from server and advertise motor levels topic.
  */
-void fugu_teleoperation::MotorPolicy::init()
+void auv_teleoperation::MotorPolicy::init()
 {
   // Set mapping and other parameters from parameter server
   initParams();
@@ -142,7 +142,7 @@ void fugu_teleoperation::MotorPolicy::init()
  *
  * Reset motor levels to null state.
  */
-void fugu_teleoperation::MotorPolicy::start()
+void auv_teleoperation::MotorPolicy::start()
 {
   ROS_INFO_STREAM("Initializing motor policy states...");
   for (int i=0; i<NUM_PAIRS; i++)
@@ -156,7 +156,7 @@ void fugu_teleoperation::MotorPolicy::start()
     for (int j=0; j<NUM_MOTORS; j++)
       pair_states_[i].motors_[j] = 0.0;
   }
-  srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+  auv_control_msgs::MotorLevelsPtr msg(new auv_control_msgs::MotorLevels());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
   msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);
@@ -173,7 +173,7 @@ void fugu_teleoperation::MotorPolicy::start()
  * @param j joystick state.
  * @return whether the pair state is modified by the joystick state.
  */
-bool fugu_teleoperation::MotorPolicy::updatePairState(PairState& p,
+bool auv_teleoperation::MotorPolicy::updatePairState(PairState& p,
                                                       const PairMapping& m,
                                                       const JoyState& j)
 {
@@ -231,7 +231,7 @@ bool fugu_teleoperation::MotorPolicy::updatePairState(PairState& p,
  *
  * @param j joystick state.
  */
-void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
+void auv_teleoperation::MotorPolicy::update(const JoyState& j)
 {
   bool updated = false;
   for (int i=0; i<NUM_PAIRS; i++)
@@ -241,7 +241,7 @@ void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
   bool pause = j.buttonPressed(pause_bttn_);
   if ( pause )
   {
-    srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+    auv_control_msgs::MotorLevelsPtr msg(new auv_control_msgs::MotorLevels());
     msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);
@@ -249,7 +249,7 @@ void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
   }
   else if ( updated )
   {
-    srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+    auv_control_msgs::MotorLevelsPtr msg(new auv_control_msgs::MotorLevels());
     msg->header.stamp = ros::Time(j.stamp());
     msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS);
     msg->levels[albatros_motor_board::MotorBoardCtrl::FORWARD_LEFT] =
@@ -268,10 +268,10 @@ void fugu_teleoperation::MotorPolicy::update(const JoyState& j)
  *
  * Send a motor levels message with null speeds for every motor.
  */
-void fugu_teleoperation::MotorPolicy::stop()
+void auv_teleoperation::MotorPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on motor policy stop...");
-  srv_msgs::MotorLevelsPtr msg(new srv_msgs::MotorLevels());
+  auv_control_msgs::MotorLevelsPtr msg(new auv_control_msgs::MotorLevels());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
   msg->levels.resize(albatros_motor_board::MotorBoardCtrl::NUM_MOTORS,0.0);

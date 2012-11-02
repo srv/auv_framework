@@ -9,9 +9,9 @@
 #define MOTOR_POLICY_H
 
 #include <ros/ros.h>
-#include "fugu_teleoperation/teleop_policy.h"
+#include "auv_teleoperation/teleop_policy.h"
 
-namespace fugu_teleoperation
+namespace auv_teleoperation
 {
 
 /** Motor teleoperation policy class.
@@ -81,7 +81,7 @@ private:
   void advertiseTopics();
   void initPairStates();
   bool updatePairState(PairState& p, const PairMapping& m,
-                       const fugu_teleoperation::JoyState& j);
+                       const auv_teleoperation::JoyState& j);
 
 };
 

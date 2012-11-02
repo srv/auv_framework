@@ -9,10 +9,10 @@
 #include <std_msgs/Float32.h>
 #include <auv_control_msgs/EnableControl.h>
 
-#include "fugu_teleoperation/altitude_control_wrench_policy.h"
+#include "auv_teleoperation/altitude_control_wrench_policy.h"
 #include "control_common/control_types.h"
 
-fugu_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(const ros::NodeHandle& n,
+auv_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(const ros::NodeHandle& n,
                                                const ros::NodeHandle& p)
 {
   nh_ = n;
@@ -22,7 +22,7 @@ fugu_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(con
 
 /** Set parameters from parameter server.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::initParams()
+void auv_teleoperation::AltitudeControlWrenchPolicy::initParams()
 {
   ROS_INFO_STREAM("Setting wrench policy mapping and parameters...");
   std::string dof_names[NUM_DOFS];
@@ -57,7 +57,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::initParams()
 }
 
 
-void fugu_teleoperation::AltitudeControlWrenchPolicy::advertiseTopics()
+void auv_teleoperation::AltitudeControlWrenchPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation wrench request...");
   wrench_pub_ = priv_.advertise<geometry_msgs::WrenchStamped>("wrench_request", 10);
@@ -67,7 +67,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::advertiseTopics()
 }
 
 
-void fugu_teleoperation::AltitudeControlWrenchPolicy::init()
+void auv_teleoperation::AltitudeControlWrenchPolicy::init()
 {
   initParams();
   advertiseTopics();
@@ -78,7 +78,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::init()
  *
  * Reset wrench levels to null state.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::start()
+void auv_teleoperation::AltitudeControlWrenchPolicy::start()
 {
   ROS_INFO_STREAM("Initializing altitude control wrench policy states...");
   for (int i=0; i<NUM_DOFS; i++)
@@ -118,7 +118,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::start()
   }
 }
 
-bool fugu_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
+bool auv_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
     DOFState& d,
     const DOFMapping& m,
     const JoyState& j)
@@ -160,7 +160,7 @@ bool fugu_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
  *
  * @param j joystick state.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
+void auv_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
 {
   bool updated = false;
   for (int i=0; i<NUM_DOFS; i++)
@@ -214,7 +214,7 @@ void fugu_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
  *
  * Send a wrench levels message with null wrench for every DOF.
  */
-void fugu_teleoperation::AltitudeControlWrenchPolicy::stop()
+void auv_teleoperation::AltitudeControlWrenchPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on wrench policy stop...");
   control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());

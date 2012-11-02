@@ -38,7 +38,7 @@
  * - @b ~frame_id frame name for published messages
  */
 
-#include "fugu_teleoperation/wrench_policy.h"
+#include "auv_teleoperation/wrench_policy.h"
 #include "control_common/control_types.h"
 #include <string>
 
@@ -52,7 +52,7 @@
  * @param p private namespace handle
  * @return
  */
-fugu_teleoperation::WrenchPolicy::WrenchPolicy(const ros::NodeHandle& n,
+auv_teleoperation::WrenchPolicy::WrenchPolicy(const ros::NodeHandle& n,
                                                const ros::NodeHandle& p)
 {
   nh_ = n;
@@ -62,7 +62,7 @@ fugu_teleoperation::WrenchPolicy::WrenchPolicy(const ros::NodeHandle& n,
 
 /** Set parameters from parameter server.
  */
-void fugu_teleoperation::WrenchPolicy::initParams()
+void auv_teleoperation::WrenchPolicy::initParams()
 {
   ROS_INFO_STREAM("Setting wrench policy mapping and parameters...");
   std::string dof_names[NUM_DOFS];
@@ -100,7 +100,7 @@ void fugu_teleoperation::WrenchPolicy::initParams()
 
 /** Advertise wrench levels topic.
  */
-void fugu_teleoperation::WrenchPolicy::advertiseTopics()
+void auv_teleoperation::WrenchPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation wrench...");
   publ_ = nh_.advertise<control_common::WrenchLevelsStamped>("wrench_request", 10);
@@ -111,7 +111,7 @@ void fugu_teleoperation::WrenchPolicy::advertiseTopics()
  *
  * Initialize parameters from server and advertise wrench levels topic.
  */
-void fugu_teleoperation::WrenchPolicy::init()
+void auv_teleoperation::WrenchPolicy::init()
 {
   // Set mapping and other parameters from parameter server
   initParams();
@@ -125,7 +125,7 @@ void fugu_teleoperation::WrenchPolicy::init()
  *
  * Reset wrench levels to null state.
  */
-void fugu_teleoperation::WrenchPolicy::start()
+void auv_teleoperation::WrenchPolicy::start()
 {
   ROS_INFO_STREAM("Initializing wrench policy states...");
   for (int i=0; i<NUM_DOFS; i++)
@@ -154,7 +154,7 @@ void fugu_teleoperation::WrenchPolicy::start()
  * @param j joystick state
  * @return whether the DOF state is modified by the joystick state.
  */
-bool fugu_teleoperation::WrenchPolicy::updateDOFState(DOFState& d,
+bool auv_teleoperation::WrenchPolicy::updateDOFState(DOFState& d,
                                                       const DOFMapping& m,
                                                       const JoyState& j)
 {
@@ -197,7 +197,7 @@ bool fugu_teleoperation::WrenchPolicy::updateDOFState(DOFState& d,
  *
  * @param j joystick state.
  */
-void fugu_teleoperation::WrenchPolicy::update(const JoyState& j)
+void auv_teleoperation::WrenchPolicy::update(const JoyState& j)
 {
   bool updated = false;
   for (int i=0; i<NUM_DOFS; i++)
@@ -238,7 +238,7 @@ void fugu_teleoperation::WrenchPolicy::update(const JoyState& j)
  *
  * Send a wrench levels message with null wrench for every DOF.
  */
-void fugu_teleoperation::WrenchPolicy::stop()
+void auv_teleoperation::WrenchPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on wrench policy stop...");
   control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());

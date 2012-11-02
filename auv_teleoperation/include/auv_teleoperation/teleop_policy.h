@@ -6,9 +6,9 @@
 #ifndef TELEOP_POLICY_H
 #define TELEOP_POLICY_H
 
-#include "fugu_teleoperation/joy_state.h"
+#include "auv_teleoperation/joy_state.h"
 
-namespace fugu_teleoperation
+namespace auv_teleoperation
 {
 
 /** Teleoperation policy interface.

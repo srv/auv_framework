@@ -8,13 +8,13 @@
  * about the current state of axes and buttons and their changes.
  */
 
-#include "fugu_teleoperation/joy_state.h"
+#include "auv_teleoperation/joy_state.h"
 
 /** Constructor to initialize members (not moved and zero position).
  *
  * @return
  */
-fugu_teleoperation::JoyState::AxisState::AxisState()
+auv_teleoperation::JoyState::AxisState::AxisState()
 : position_(0.0), moved_(false)
 {}
 
@@ -22,7 +22,7 @@ fugu_teleoperation::JoyState::AxisState::AxisState()
  *
  * @return
  */
-fugu_teleoperation::JoyState::ButtonState::ButtonState()
+auv_teleoperation::JoyState::ButtonState::ButtonState()
 : position_(0), moved_(false)
 {}
 
@@ -30,7 +30,7 @@ fugu_teleoperation::JoyState::ButtonState::ButtonState()
  *
  * @return
  */
-fugu_teleoperation::JoyState::JoyState()
+auv_teleoperation::JoyState::JoyState()
 : stamp_(0.0)
 {}
 
@@ -48,7 +48,7 @@ fugu_teleoperation::JoyState::JoyState()
  *
  * @param joy_msg message to update the state from.
  */
-void fugu_teleoperation::JoyState::update(const sensor_msgs::JoyConstPtr& joy_msg)
+void auv_teleoperation::JoyState::update(const sensor_msgs::JoyConstPtr& joy_msg)
 {
   const int num_axes = joy_msg->axes.size();
   axis_states_.resize(num_axes);
@@ -90,7 +90,7 @@ void fugu_teleoperation::JoyState::update(const sensor_msgs::JoyConstPtr& joy_ms
  * @param i button index (negative means invalid button).
  * @return true if index is non-negative and less than the number of buttons.
  */
-bool fugu_teleoperation::JoyState::button(int i) const
+bool auv_teleoperation::JoyState::button(int i) const
 {
   return (0<=i) && ((unsigned int)i<button_states_.size());
 }
@@ -100,7 +100,7 @@ bool fugu_teleoperation::JoyState::button(int i) const
  * @param i button index.
  * @return button position (1 means pressed, 0 means depressed or invalid index).
  */
-int fugu_teleoperation::JoyState::buttonPosition(int i) const
+int auv_teleoperation::JoyState::buttonPosition(int i) const
 {
   if( button(i) )
     return button_states_[i].position_;
@@ -113,7 +113,7 @@ int fugu_teleoperation::JoyState::buttonPosition(int i) const
  * @param i button index.
  * @return true if button is valid and moved, false otherwise.
  */
-bool fugu_teleoperation::JoyState::buttonMoved(int i) const
+bool auv_teleoperation::JoyState::buttonMoved(int i) const
 {
   if( button(i) )
     return button_states_[i].moved_;
@@ -127,7 +127,7 @@ bool fugu_teleoperation::JoyState::buttonMoved(int i) const
  * @param i button index.
  * @return true if button is valid and moved and now is pressed, false otherwise.
  */
-bool fugu_teleoperation::JoyState::buttonPressed(int i) const
+bool auv_teleoperation::JoyState::buttonPressed(int i) const
 {
   if( button(i) )
     return button_states_[i].moved_ && (button_states_[i].position_>0);
@@ -140,7 +140,7 @@ bool fugu_teleoperation::JoyState::buttonPressed(int i) const
  * @param i button index.
  * @return true if button is valid and moved and now is depressed, false otherwise.
  */
-bool fugu_teleoperation::JoyState::buttonReleased(int i) const
+bool auv_teleoperation::JoyState::buttonReleased(int i) const
 {
   if( button(i) )
     return button_states_[i].moved_ && (button_states_[i].position_==0);
@@ -153,7 +153,7 @@ bool fugu_teleoperation::JoyState::buttonReleased(int i) const
  * @param i axis index (negative means invalid axis).
  * @return true if index is non-negative and less than the number of axes.
  */
-bool fugu_teleoperation::JoyState::axis(int i) const
+bool auv_teleoperation::JoyState::axis(int i) const
 {
   return (0<=i) && ((unsigned int)i<axis_states_.size());
 }
@@ -164,7 +164,7 @@ bool fugu_teleoperation::JoyState::axis(int i) const
  * @param i axis index.
  * @return axis position (in range [-1,1], 0.0 means center or invalid index).
  */
-float fugu_teleoperation::JoyState::axisPosition(int i) const
+float auv_teleoperation::JoyState::axisPosition(int i) const
 {
   if( axis(i) )
     return axis_states_[i].position_;
@@ -177,7 +177,7 @@ float fugu_teleoperation::JoyState::axisPosition(int i) const
  * @param i axis index.
  * @return true if axis is valid and moved, false otherwise.
  */
-bool fugu_teleoperation::JoyState::axisMoved(int i) const
+bool auv_teleoperation::JoyState::axisMoved(int i) const
 {
   if( axis(i) )
     return axis_states_[i].moved_;
@@ -189,7 +189,7 @@ bool fugu_teleoperation::JoyState::axisMoved(int i) const
  *
  * @return time stamp of last sample.
  */
-double fugu_teleoperation::JoyState::stamp() const
+double auv_teleoperation::JoyState::stamp() const
 {
   return stamp_;
 }

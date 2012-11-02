@@ -10,12 +10,12 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
-#include "fugu_teleoperation/joy_state.h"
-#include "fugu_teleoperation/motor_policy.h"
-#include "fugu_teleoperation/wrench_policy.h"
-#include "fugu_teleoperation/altitude_control_wrench_policy.h"
-#include "fugu_teleoperation/depth_control_wrench_policy.h"
-#include "fugu_teleoperation/twist_policy.h"
+#include "auv_teleoperation/joy_state.h"
+#include "auv_teleoperation/motor_policy.h"
+#include "auv_teleoperation/wrench_policy.h"
+#include "auv_teleoperation/altitude_control_wrench_policy.h"
+#include "auv_teleoperation/depth_control_wrench_policy.h"
+#include "auv_teleoperation/twist_policy.h"
 
 
 class FuguTeleopJoyNode
@@ -32,13 +32,13 @@ private:
   ros::Publisher publ_;
   ros::Subscriber joy_subs_;
 
-  typedef boost::shared_ptr<fugu_teleoperation::TeleopPolicy> TeleopPolicyPtr;
+  typedef boost::shared_ptr<auv_teleoperation::TeleopPolicy> TeleopPolicyPtr;
   std::vector<TeleopPolicyPtr> policies_;
   std::vector<TeleopPolicyPtr>::iterator current_policy_;
   void changePolicy();
 
   int policy_bttn_;
-  fugu_teleoperation::JoyState joy_state_;
+  auv_teleoperation::JoyState joy_state_;
   void joyCallback(const sensor_msgs::JoyConstPtr& joy);
 };
 
@@ -56,11 +56,11 @@ void FuguTeleopJoyNode::initParams()
 void FuguTeleopJoyNode::loadPolicies()
 {
   ROS_INFO_STREAM("Loading policies...");
-  TeleopPolicyPtr motor_policy_ptr_( new fugu_teleoperation::MotorPolicy(nh_,priv_) );
-  TeleopPolicyPtr wrench_policy_ptr_( new fugu_teleoperation::WrenchPolicy(nh_,priv_) );
-  TeleopPolicyPtr altitude_control_wrench_policy_ptr_( new fugu_teleoperation::AltitudeControlWrenchPolicy(nh_,priv_) );
-  TeleopPolicyPtr depth_control_wrench_policy_ptr_( new fugu_teleoperation::DepthControlWrenchPolicy(nh_,priv_) );
-  TeleopPolicyPtr twist_policy_ptr_( new fugu_teleoperation::TwistPolicy(nh_,priv_) );
+  TeleopPolicyPtr motor_policy_ptr_( new auv_teleoperation::MotorPolicy(nh_,priv_) );
+  TeleopPolicyPtr wrench_policy_ptr_( new auv_teleoperation::WrenchPolicy(nh_,priv_) );
+  TeleopPolicyPtr altitude_control_wrench_policy_ptr_( new auv_teleoperation::AltitudeControlWrenchPolicy(nh_,priv_) );
+  TeleopPolicyPtr depth_control_wrench_policy_ptr_( new auv_teleoperation::DepthControlWrenchPolicy(nh_,priv_) );
+  TeleopPolicyPtr twist_policy_ptr_( new auv_teleoperation::TwistPolicy(nh_,priv_) );
   policies_.push_back(motor_policy_ptr_);
   policies_.push_back(wrench_policy_ptr_);
   policies_.push_back(altitude_control_wrench_policy_ptr_);

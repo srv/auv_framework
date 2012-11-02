@@ -14,7 +14,7 @@
 #include <sensor_msgs/Joy.h>
 #include <vector>
 
-namespace fugu_teleoperation
+namespace auv_teleoperation
 {
 
 /**

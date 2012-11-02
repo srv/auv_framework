@@ -9,9 +9,9 @@
 #define TWIST_POLICY_H
 
 #include <ros/ros.h>
-#include "fugu_teleoperation/teleop_policy.h"
+#include "auv_teleoperation/teleop_policy.h"
 
-namespace fugu_teleoperation
+namespace auv_teleoperation
 {
 
 /** Twist teleoperation policy class.
@@ -66,7 +66,7 @@ private:
   void advertiseTopics();
 
   bool updateDOFState(DOFState& d, const DOFMapping& m,
-                      const fugu_teleoperation::JoyState& j);
+                      const auv_teleoperation::JoyState& j);
 
 };
 

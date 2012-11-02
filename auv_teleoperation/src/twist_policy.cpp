@@ -29,7 +29,7 @@
  *   - @b ~frame_id frame name for published messages
  */
 
-#include "fugu_teleoperation/twist_policy.h"
+#include "auv_teleoperation/twist_policy.h"
 #include "control_common/control_types.h"
 #include <string>
 
@@ -43,7 +43,7 @@
  * @param p private namespace handle
  * @return
  */
-fugu_teleoperation::TwistPolicy::TwistPolicy(const ros::NodeHandle& n,
+auv_teleoperation::TwistPolicy::TwistPolicy(const ros::NodeHandle& n,
                                              const ros::NodeHandle& p)
 {
   nh_ = n;
@@ -53,7 +53,7 @@ fugu_teleoperation::TwistPolicy::TwistPolicy(const ros::NodeHandle& n,
 
 /** Set parameters from parameter server.
  */
-void fugu_teleoperation::TwistPolicy::initParams()
+void auv_teleoperation::TwistPolicy::initParams()
 {
   ROS_INFO_STREAM("Setting twist policy mapping and parameters...");
   std::string dof_names[NUM_DOFS];
@@ -91,7 +91,7 @@ void fugu_teleoperation::TwistPolicy::initParams()
 
 /** Advertise wrench levels topic.
  */
-void fugu_teleoperation::TwistPolicy::advertiseTopics()
+void auv_teleoperation::TwistPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation twist levels...");
   publ_ = nh_.advertise<control_common::TwistLevelsStamped>("twist_levels", 10);
@@ -102,7 +102,7 @@ void fugu_teleoperation::TwistPolicy::advertiseTopics()
  *
  * Initialize parameters from server and advertise twist levels topic.
  */
-void fugu_teleoperation::TwistPolicy::init()
+void auv_teleoperation::TwistPolicy::init()
 {
   // Set mapping and other parameters from parameter server
   initParams();
@@ -116,7 +116,7 @@ void fugu_teleoperation::TwistPolicy::init()
  *
  * Reset twist levels to null state.
  */
-void fugu_teleoperation::TwistPolicy::start()
+void auv_teleoperation::TwistPolicy::start()
 {
   ROS_INFO_STREAM("Initializing twist policy states...");
   for (int i=0; i<NUM_DOFS; i++)
@@ -145,7 +145,7 @@ void fugu_teleoperation::TwistPolicy::start()
  * @param j joystick state
  * @return whether the DOF state is modified by the joystick state.
  */
-bool fugu_teleoperation::TwistPolicy::updateDOFState(DOFState& d,
+bool auv_teleoperation::TwistPolicy::updateDOFState(DOFState& d,
                                                       const DOFMapping& m,
                                                       const JoyState& j)
 {
@@ -188,7 +188,7 @@ bool fugu_teleoperation::TwistPolicy::updateDOFState(DOFState& d,
  *
  * @param j joystick state.
  */
-void fugu_teleoperation::TwistPolicy::update(const JoyState& j)
+void auv_teleoperation::TwistPolicy::update(const JoyState& j)
 {
   bool updated = false;
   for (int i=0; i<NUM_DOFS; i++)
@@ -229,7 +229,7 @@ void fugu_teleoperation::TwistPolicy::update(const JoyState& j)
  *
  * Send a twist levels message with null twist for every DOF.
  */
-void fugu_teleoperation::TwistPolicy::stop()
+void auv_teleoperation::TwistPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on twist policy stop...");
   control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
