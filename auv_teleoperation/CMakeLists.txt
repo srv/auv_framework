@@ -28,3 +28,14 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+rosbuild_add_library(joy_state src/joy_state.cpp)
+
+rosbuild_add_executable(teleoperation_node 
+                          src/fugu_teleop_joy_node.cpp
+                          src/motor_policy.cpp
+                          src/wrench_policy.cpp
+                          src/altitude_control_wrench_policy.cpp
+                          src/depth_control_wrench_policy.cpp
+                          src/twist_policy.cpp
+)
+target_link_libraries(teleoperation_node joy_state)
