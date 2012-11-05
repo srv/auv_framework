@@ -38,9 +38,9 @@
  * - @b ~frame_id frame name for published messages
  */
 
-#include "auv_teleoperation/wrench_policy.h"
-#include "control_common/control_types.h"
 #include <string>
+#include <geometry_msgs/WrenchStamped.h>
+#include "auv_teleoperation/wrench_policy.h"
 
 
 /** Constructor passing through the node handles
@@ -103,7 +103,7 @@ void auv_teleoperation::WrenchPolicy::initParams()
 void auv_teleoperation::WrenchPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation wrench...");
-  publ_ = nh_.advertise<control_common::WrenchLevelsStamped>("wrench_request", 10);
+  publ_ = nh_.advertise<geometry_msgs::WrenchStamped>("wrench_request", 10);
 }
 
 
@@ -134,7 +134,7 @@ void auv_teleoperation::WrenchPolicy::start()
     dof_state_[i].offst_ = 0.0;
     dof_state_[i].value_ = 0.0;
   }
-  control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+  geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
   msg->wrench.force.x = 0.0;
@@ -207,7 +207,7 @@ void auv_teleoperation::WrenchPolicy::update(const JoyState& j)
   bool pause = j.buttonPressed(pause_bttn_);
   if ( pause )
   {
-    control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
     msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = 0.0;
@@ -220,7 +220,7 @@ void auv_teleoperation::WrenchPolicy::update(const JoyState& j)
   }
   else if ( updated )
   {
-    control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
     msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = dof_state_[LIN_X].value_;
@@ -241,7 +241,7 @@ void auv_teleoperation::WrenchPolicy::update(const JoyState& j)
 void auv_teleoperation::WrenchPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on wrench policy stop...");
-  control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+  geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
   msg->wrench.force.x = 0.0;

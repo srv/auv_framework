@@ -7,10 +7,10 @@
 
 #include <string>
 #include <std_msgs/Float32.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <auv_control_msgs/EnableControl.h>
 
 #include "auv_teleoperation/altitude_control_wrench_policy.h"
-#include "control_common/control_types.h"
 
 auv_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(const ros::NodeHandle& n,
                                                const ros::NodeHandle& p)
@@ -178,7 +178,7 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
   bool pause = j.buttonPressed(pause_button_);
   if ( pause )
   {
-    control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
     msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = 0.0;
@@ -191,7 +191,7 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
   }
   else if ( updated )
   {
-    control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
     msg->header.stamp = ros::Time(j.stamp());
     msg->header.frame_id = frame_id_;
     msg->wrench.force.x = dof_state_[LINEAR_X].offset_ + dof_state_[LINEAR_X].value_;
@@ -217,7 +217,7 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
 void auv_teleoperation::AltitudeControlWrenchPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on wrench policy stop...");
-  control_common::WrenchLevelsStampedPtr msg(new control_common::WrenchLevelsStamped());
+  geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
   msg->header.stamp = ros::Time::now();
   msg->header.frame_id = frame_id_;
   msg->wrench.force.x = 0.0;

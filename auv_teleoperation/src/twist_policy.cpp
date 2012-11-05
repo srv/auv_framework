@@ -29,9 +29,9 @@
  *   - @b ~frame_id frame name for published messages
  */
 
-#include "auv_teleoperation/twist_policy.h"
-#include "control_common/control_types.h"
 #include <string>
+#include <geometry_msgs/TwistStamped.h>
+#include "auv_teleoperation/twist_policy.h"
 
 
 /** Constructor passing through the node handles
@@ -94,7 +94,7 @@ void auv_teleoperation::TwistPolicy::initParams()
 void auv_teleoperation::TwistPolicy::advertiseTopics()
 {
   ROS_INFO_STREAM("Advertising teleoperation twist levels...");
-  publ_ = nh_.advertise<control_common::TwistLevelsStamped>("twist_levels", 10);
+  publ_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_request", 1);
 }
 
 
@@ -125,15 +125,15 @@ void auv_teleoperation::TwistPolicy::start()
     dof_state_[i].offst_ = 0.0;
     dof_state_[i].value_ = 0.0;
   }
-  control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-  msg->header.stamp = ros::Time::now();
-  msg->header.frame_id = frame_id_;
-  msg->twist.linear.x = 0.0;
-  msg->twist.linear.y = 0.0;
-  msg->twist.linear.z = 0.0;
-  msg->twist.angular.x = 0.0;
-  msg->twist.angular.y = 0.0;
-  msg->twist.angular.z = 0.0;
+  geometry_msgs::TwistStamped msg;
+  msg.header.stamp = ros::Time::now();
+  msg.header.frame_id = frame_id_;
+  msg.twist.linear.x = 0.0;
+  msg.twist.linear.y = 0.0;
+  msg.twist.linear.z = 0.0;
+  msg.twist.angular.x = 0.0;
+  msg.twist.angular.y = 0.0;
+  msg.twist.angular.z = 0.0;
   publ_.publish(msg);
 }
 
@@ -198,28 +198,28 @@ void auv_teleoperation::TwistPolicy::update(const JoyState& j)
   bool pause = j.buttonPressed(pause_bttn_);
   if ( pause )
   {
-    control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-    msg->header.stamp = ros::Time(j.stamp());
-    msg->header.frame_id = frame_id_;
-    msg->twist.linear.x = 0.0;
-    msg->twist.linear.y = 0.0;
-    msg->twist.linear.z = 0.0;
-    msg->twist.angular.x = 0.0;
-    msg->twist.angular.y = 0.0;
-    msg->twist.angular.z = 0.0;
+    geometry_msgs::TwistStamped msg;
+    msg.header.stamp = ros::Time(j.stamp());
+    msg.header.frame_id = frame_id_;
+    msg.twist.linear.x = 0.0;
+    msg.twist.linear.y = 0.0;
+    msg.twist.linear.z = 0.0;
+    msg.twist.angular.x = 0.0;
+    msg.twist.angular.y = 0.0;
+    msg.twist.angular.z = 0.0;
     publ_.publish(msg);
   }
   else if ( updated )
   {
-    control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-    msg->header.stamp = ros::Time(j.stamp());
-    msg->header.frame_id = frame_id_;
-    msg->twist.linear.x = dof_state_[LIN_X].value_;
-    msg->twist.linear.y = dof_state_[LIN_Y].value_;
-    msg->twist.linear.z = dof_state_[LIN_Z].value_;
-    msg->twist.angular.x = dof_state_[ANG_X].value_;
-    msg->twist.angular.y = dof_state_[ANG_Y].value_;
-    msg->twist.angular.z = dof_state_[ANG_Z].value_;
+    geometry_msgs::TwistStamped msg;
+    msg.header.stamp = ros::Time(j.stamp());
+    msg.header.frame_id = frame_id_;
+    msg.twist.linear.x = dof_state_[LIN_X].value_;
+    msg.twist.linear.y = dof_state_[LIN_Y].value_;
+    msg.twist.linear.z = dof_state_[LIN_Z].value_;
+    msg.twist.angular.x = dof_state_[ANG_X].value_;
+    msg.twist.angular.y = dof_state_[ANG_Y].value_;
+    msg.twist.angular.z = dof_state_[ANG_Z].value_;
     publ_.publish(msg);
   }
 }
@@ -232,15 +232,15 @@ void auv_teleoperation::TwistPolicy::update(const JoyState& j)
 void auv_teleoperation::TwistPolicy::stop()
 {
   ROS_INFO_STREAM("Sending null command on twist policy stop...");
-  control_common::TwistLevelsStampedPtr msg(new control_common::TwistLevelsStamped());
-  msg->header.stamp = ros::Time::now();
-  msg->header.frame_id = frame_id_;
-  msg->twist.linear.x = 0.0;
-  msg->twist.linear.y = 0.0;
-  msg->twist.linear.z = 0.0;
-  msg->twist.angular.x = 0.0;
-  msg->twist.angular.y = 0.0;
-  msg->twist.angular.z = 0.0;
+  geometry_msgs::TwistStamped msg;
+  msg.header.stamp = ros::Time::now();
+  msg.header.frame_id = frame_id_;
+  msg.twist.linear.x = 0.0;
+  msg.twist.linear.y = 0.0;
+  msg.twist.linear.z = 0.0;
+  msg.twist.angular.x = 0.0;
+  msg.twist.angular.y = 0.0;
+  msg.twist.angular.z = 0.0;
   publ_.publish(msg);
 }
 
