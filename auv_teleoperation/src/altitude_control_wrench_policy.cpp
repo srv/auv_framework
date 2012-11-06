@@ -10,10 +10,10 @@ auv_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(
 {
   nh_priv_.param("frame_id",frame_id_,std::string("base_link"));
   ROS_DEBUG_STREAM("Frame id set to " << frame_id_);
-  ROS_INFO_STREAM("Advertising teleoperation wrench request as " <<
-      nh_priv_.resolveName("wrench_request"));
+  ROS_INFO_STREAM("Advertising teleoperation wrench as " <<
+      nh_priv_.resolveName("wrench"));
   wrench_pub_ = nh_priv_.advertise<geometry_msgs::WrenchStamped>(
-      "wrench_request", 1);
+      "wrench", 1);
   bool latched = true;
   ROS_INFO_STREAM("Advertising altitude request as " <<
       nh_priv.resolveName("altitude_request"));

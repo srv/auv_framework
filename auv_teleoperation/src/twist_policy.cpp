@@ -9,9 +9,9 @@ auv_teleoperation::TwistPolicy::TwistPolicy(
   ROS_DEBUG_STREAM("Frame id set to " << frame_id_);
 
   ROS_INFO_STREAM("Advertising teleoperation twist as " <<
-      nh_priv_.resolveName("twist_request"));
+      nh_priv_.resolveName("twist"));
   pub_ = nh_priv_.advertise<geometry_msgs::TwistStamped>(
-      "twist_request", 1);
+      "twist", 1);
 }
 
 void auv_teleoperation::TwistPolicy::start()
