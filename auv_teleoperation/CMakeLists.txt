@@ -16,15 +16,19 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
+find_package(Eigen REQUIRED)
+include_directories(${EIGEN_INCLUDE_DIRS})
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+rosbuild_add_library(joy_state src/joy_state.cpp)
+rosbuild_add_library(joy_dof_mapping src/joy_dof_mapping.cpp)
+
+rosbuild_add_executable(teleoperation_joy_node 
+                          src/teleoperation_joy_node.cpp
+                          src/motor_policy.cpp
+                          src/wrench_policy.cpp
+                          src/altitude_control_wrench_policy.cpp
+                          src/depth_control_wrench_policy.cpp
+                          src/twist_policy.cpp
+)
+target_link_libraries(teleoperation_joy_node joy_state joy_dof_mapping)
+
