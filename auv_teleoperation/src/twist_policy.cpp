@@ -1,4 +1,6 @@
 #include <geometry_msgs/TwistStamped.h>
+#include <auv_control_msgs/EnableControl.h>
+
 #include "auv_teleoperation/twist_policy.h"
 
 auv_teleoperation::TwistPolicy::TwistPolicy(
@@ -21,6 +23,28 @@ void auv_teleoperation::TwistPolicy::start()
   msg.header.stamp = ros::Time::now();
   msg.header.frame_id = frame_id_;
   pub_.publish(msg);
+
+  ros::ServiceClient client = 
+    nh_.serviceClient<auv_control_msgs::EnableControl>(
+        "enable_twist_control");
+  auv_control_msgs::EnableControl control_service;
+  control_service.request.enable = true;
+  if (client.call(control_service))
+  {
+    if (control_service.response.enabled)
+    {
+      ROS_INFO("Twist control enabled.");
+    }
+    else
+    {
+      ROS_ERROR("Failed to enable twist control!");
+    }
+  }
+  else
+  {
+    ROS_ERROR("Failed to call service %s", 
+        nh_.resolveName("enable_twist_control").c_str());
+  }
 }
 
 void auv_teleoperation::TwistPolicy::pause()
@@ -39,6 +63,28 @@ void auv_teleoperation::TwistPolicy::stop()
   msg.header.stamp = ros::Time::now();
   msg.header.frame_id = frame_id_;
   pub_.publish(msg);
+
+  ros::ServiceClient client = 
+    nh_.serviceClient<auv_control_msgs::EnableControl>(
+        "enable_twist_control");
+  auv_control_msgs::EnableControl control_service;
+  control_service.request.enable = false;
+  if (client.call(control_service))
+  {
+    if (!control_service.response.enabled)
+    {
+      ROS_INFO("Twist control disabled.");
+    }
+    else
+    {
+      ROS_ERROR("Failed to disable twist control!");
+    }
+  }
+  else
+  {
+    ROS_ERROR("Failed to call service %s", 
+        nh_.resolveName("enable_twist_control").c_str());
+  }
 }
 
 void auv_teleoperation::TwistPolicy::updateDOFs(const ros::Time& stamp)
