@@ -1,15 +1,8 @@
-/**
- * @file wrench_policy.h
- * @brief Wrench teleoperation policy presentation.
- * @author Joan Pau Beltran
- * @date 2011-06-29
- */
-
 #ifndef WRENCH_POLICY_H
 #define WRENCH_POLICY_H
 
 #include <ros/ros.h>
-#include "auv_teleoperation/teleop_policy.h"
+#include "auv_teleoperation/teleoperation_policy.h"
 
 namespace auv_teleoperation
 {
@@ -19,54 +12,46 @@ namespace auv_teleoperation
  * The wrench policy responds to joystick events
  * controlling the wrench levels on each DOF.
  */
-class WrenchPolicy : public TeleopPolicy
+class WrenchPolicy : public TeleoperationPolicy
 {
 public:
-  WrenchPolicy(const ros::NodeHandle& n, const ros::NodeHandle& p);
-  void init();
-  void update(const JoyState& j); //!< joystick response
-  void start();
-  void stop();
+
+  /**
+   * Constructs a wrench policy with given node handles.
+   * The handle nh_priv will be used to get all parameters,
+   * the hande nh will be used to advertise topics.
+   */
+  WrenchPolicy(const ros::NodeHandle& nh, const ros::NodeHandle& nh_priv);
+
+  /**
+   * Sends a zero wrench
+   */
+  virtual void start();
+
+  /**
+   * Sends a zero wrench
+   */
+  virtual void pause();
+
+  /**
+   * Sends a zero wrench
+   */
+  virtual void stop();
+
+protected:
+  /**
+   * Puts all dof_values in a twist message with given stamp
+   * and sends it.
+   */
+  virtual void updateDOFs(const ros::Time& stamp);
 
 private:
+
   ros::NodeHandle nh_;
-  ros::NodeHandle priv_;
-  ros::Publisher publ_;
+  ros::NodeHandle nh_priv_;
 
   std::string frame_id_;
-
-  enum DOFS {LIN_X, LIN_Y, LIN_Z, ANG_X, ANG_Y, ANG_Z};
-  static const int NUM_DOFS = 6;
-
-  struct DOFMapping
-  {
-    int incrm_axis_;
-    int poffs_bttn_;
-    int noffs_bttn_;
-    int reset_bttn_;
-    double factor_;
-    double step_;
-  };
-
-  DOFMapping dof_map_[NUM_DOFS];
-
-  struct DOFState
-  {
-    float offst_;
-    float incrm_;
-    float value_;
-  };
-
-  DOFState dof_state_[NUM_DOFS];
-
-  int pause_bttn_;
-
-  void initDOFStates();
-  void initParams();
-  void advertiseTopics();
-
-  bool updateDOFState(DOFState& d, const DOFMapping& m,
-                      const auv_teleoperation::JoyState& j);
+  ros::Publisher pub_;
 
 };
 

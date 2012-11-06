@@ -20,14 +20,15 @@ find_package(Eigen REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 rosbuild_add_library(joy_state src/joy_state.cpp)
+rosbuild_add_library(joy_dof_mapping src/joy_dof_mapping.cpp)
 
-rosbuild_add_executable(teleoperation_node 
-                          src/teleoperation_node.cpp
+rosbuild_add_executable(teleoperation_joy_node 
+                          src/teleoperation_joy_node.cpp
                           src/motor_policy.cpp
                           src/wrench_policy.cpp
                           src/altitude_control_wrench_policy.cpp
                           src/depth_control_wrench_policy.cpp
                           src/twist_policy.cpp
 )
-target_link_libraries(teleoperation_node joy_state)
+target_link_libraries(teleoperation_joy_node joy_state joy_dof_mapping)
 

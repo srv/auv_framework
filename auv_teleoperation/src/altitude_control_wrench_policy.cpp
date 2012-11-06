@@ -1,103 +1,33 @@
-/**
- * @file altitude_control_wrench_policy.cpp
- * @brief Wrench teleoperation policy implementation.
- * @author Stephan Wirth
- * @date 2012-10-16
- */
-
-#include <string>
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <auv_control_msgs/EnableControl.h>
 
 #include "auv_teleoperation/altitude_control_wrench_policy.h"
 
-auv_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(const ros::NodeHandle& n,
-                                               const ros::NodeHandle& p)
+auv_teleoperation::AltitudeControlWrenchPolicy::AltitudeControlWrenchPolicy(
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_priv) :
+  TeleoperationPolicy(6, nh_priv), nh_(nh), nh_priv_(nh_priv)
 {
-  nh_ = n;
-  priv_ = ros::NodeHandle(p,"altitude_control_wrench_policy");
-}
-
-
-/** Set parameters from parameter server.
- */
-void auv_teleoperation::AltitudeControlWrenchPolicy::initParams()
-{
-  ROS_INFO_STREAM("Setting wrench policy mapping and parameters...");
-  std::string dof_names[NUM_DOFS];
-  dof_names[LINEAR_X] = "linear_x";
-  dof_names[LINEAR_Y] = "linear_y";
-  dof_names[ALTITUDE] = "altitude";
-  dof_names[ANGULAR_X] = "angular_x";
-  dof_names[ANGULAR_Y] = "angular_y";
-  dof_names[ANGULAR_Z] = "angular_z";
-  for (int i=0; i<NUM_DOFS; i++)
-  {
-    std::string dof_name = dof_names[i];
-    priv_.param(dof_name+"_axis",dof_map_[i].axis_,-1);
-    priv_.param(dof_name+"_negative_offset_button",dof_map_[i].negative_offset_button_,-1);
-    priv_.param(dof_name+"_positive_offset_button",dof_map_[i].positive_offset_button_,-1);
-    priv_.param(dof_name+"_reset_button",dof_map_[i].reset_button_,-1);
-    priv_.param(dof_name+"_factor", dof_map_[i].factor_,0.0);
-    priv_.param(dof_name+"_offset_step", dof_map_[i].offset_step_,0.0);
-
-    ROS_DEBUG_STREAM(dof_name+" axis   : " << dof_map_[i].axis_);
-    ROS_DEBUG_STREAM(dof_name+" factor : " << dof_map_[i].factor_);
-    ROS_DEBUG_STREAM(dof_name+" offset buttons (+/-): " << dof_map_[i].positive_offset_button_ << " "
-                                                   << dof_map_[i].negative_offset_button_);
-    ROS_DEBUG_STREAM(dof_name+" offset step    : " << dof_map_[i].offset_step_);
-    ROS_DEBUG_STREAM(dof_name+" reset button : " << dof_map_[i].reset_button_);
-  }
-  priv_.param("pause_button",pause_button_,-1);
-  ROS_DEBUG_STREAM("Pause button set to " << pause_button_);
-
-  priv_.param("frame_id",frame_id_,std::string(""));
+  nh_priv_.param("frame_id",frame_id_,std::string("base_link"));
   ROS_DEBUG_STREAM("Frame id set to " << frame_id_);
-}
-
-
-void auv_teleoperation::AltitudeControlWrenchPolicy::advertiseTopics()
-{
-  ROS_INFO_STREAM("Advertising teleoperation wrench request...");
-  wrench_pub_ = priv_.advertise<geometry_msgs::WrenchStamped>("wrench_request", 10);
+  ROS_INFO_STREAM("Advertising teleoperation wrench request as " <<
+      nh_priv_.resolveName("wrench_request"));
+  wrench_pub_ = nh_priv_.advertise<geometry_msgs::WrenchStamped>(
+      "wrench_request", 1);
   bool latched = true;
-  altitude_request_pub_ = priv_.advertise<std_msgs::Float32>("altitude_request", 1, latched);
-
+  ROS_INFO_STREAM("Advertising altitude request as " <<
+      nh_priv.resolveName("altitude_request"));
+  altitude_request_pub_ = nh_priv_.advertise<std_msgs::Float32>(
+      "altitude_request", 1, latched);
 }
 
-
-void auv_teleoperation::AltitudeControlWrenchPolicy::init()
-{
-  initParams();
-  advertiseTopics();
-}
-
-
-/** TeleopPolicy start function redefinition.
- *
- * Reset wrench levels to null state.
- */
 void auv_teleoperation::AltitudeControlWrenchPolicy::start()
 {
-  ROS_INFO_STREAM("Initializing altitude control wrench policy states...");
-  for (int i=0; i<NUM_DOFS; i++)
-  {
-    dof_state_[i].offset_ = 0.0;
-    dof_state_[i].value_ = 0.0;
-  }
-  geometry_msgs::WrenchStamped msg;
-  msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = frame_id_;
-  msg.wrench.force.x = 0.0;
-  msg.wrench.force.y = 0.0;
-  msg.wrench.force.z = 0.0;
-  msg.wrench.torque.x = 0.0;
-  msg.wrench.torque.y = 0.0;
-  msg.wrench.torque.z = 0.0;
-  wrench_pub_.publish(msg);
-
-  ros::ServiceClient client = nh_.serviceClient<auv_control_msgs::EnableControl>("enable_altitude_control");
+  ROS_INFO_STREAM("Starting altitude control wrench policy...");
+  resetDOFStates();
+  ros::ServiceClient client = 
+    nh_.serviceClient<auv_control_msgs::EnableControl>(
+        "enable_altitude_control");
   auv_control_msgs::EnableControl control_service;
   control_service.request.enable = true;
   if (client.call(control_service))
@@ -105,7 +35,8 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::start()
     if (control_service.response.enabled)
     {
       ROS_INFO("Altitude control enabled.");
-      dof_state_[ALTITUDE].offset_ = control_service.response.current_setpoint;
+      dof_states_[2].offset = 
+        control_service.response.current_setpoint;
     }
     else
     {
@@ -114,121 +45,29 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::start()
   }
   else
   {
-    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_altitude_control").c_str());
+    ROS_ERROR("Failed to call service %s", 
+        nh_.resolveName("enable_altitude_control").c_str());
   }
+  updateDOFs(ros::Time::now());
 }
 
-bool auv_teleoperation::AltitudeControlWrenchPolicy::updateDOFState(
-    DOFState& d,
-    const DOFMapping& m,
-    const JoyState& j)
+void auv_teleoperation::AltitudeControlWrenchPolicy::pause()
 {
-  bool update = false;
-  if ( j.buttonPressed(m.reset_button_) )
-  {
-    d.offset_ = 0.0;
-    update = true;
-  }
-  if ( j.buttonPressed(m.negative_offset_button_) )
-  {
-    d.offset_ -= m.offset_step_;
-    update = true;
-  }
-  if ( j.buttonPressed(m.positive_offset_button_) )
-  {
-    d.offset_ += m.offset_step_;
-    update = true;
-  }
-  if ( j.axisMoved(m.axis_) )
-  {
-    d.value_ = m.factor_*j.axisPosition(m.axis_);
-    update = true;
-  }
-  return update;
+  ROS_INFO_STREAM(
+      "Sending null wrench on altitude control policy pause...");
+  geometry_msgs::WrenchStamped msg;
+  msg.header.stamp = ros::Time::now();
+  msg.header.frame_id = frame_id_;
+  wrench_pub_.publish(msg);
 }
 
-
-/** TeleopPolicy update function redefinition.
- *
- * Implemented button actions are:
- *   - increase force/torque offset for each DOF
- *   - decrease force/torque offset for each DOF
- *   - reset force/torque offset for each DOF
- *   - set all DOFs to null state  (without resetting offsets)
- * If any DOF wrench level is modified by the joystick,
- * the DOF state is updated and a new wrench levels message is published.
- *
- * @param j joystick state.
- */
-void auv_teleoperation::AltitudeControlWrenchPolicy::update(const JoyState& j)
-{
-  bool updated = false;
-  for (int i=0; i<NUM_DOFS; i++)
-  {
-    if (i != ALTITUDE)
-    {
-      if ( updateDOFState(dof_state_[i], dof_map_[i], j) )
-        updated = true;
-    }
-  }
-  bool altitude_updated = false;
-  if ( updateDOFState(dof_state_[ALTITUDE], dof_map_[ALTITUDE], j) )
-    altitude_updated = true;
-
-  bool pause = j.buttonPressed(pause_button_);
-  if ( pause )
-  {
-    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
-    msg->header.stamp = ros::Time(j.stamp());
-    msg->header.frame_id = frame_id_;
-    msg->wrench.force.x = 0.0;
-    msg->wrench.force.y = 0.0;
-    msg->wrench.force.z = 0.0;
-    msg->wrench.torque.x = 0.0;
-    msg->wrench.torque.y = 0.0;
-    msg->wrench.torque.z = 0.0;
-    wrench_pub_.publish(msg);
-  }
-  else if ( updated )
-  {
-    geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
-    msg->header.stamp = ros::Time(j.stamp());
-    msg->header.frame_id = frame_id_;
-    msg->wrench.force.x = dof_state_[LINEAR_X].offset_ + dof_state_[LINEAR_X].value_;
-    msg->wrench.force.y = dof_state_[LINEAR_Y].offset_ + dof_state_[LINEAR_Y].value_;
-    msg->wrench.torque.x = dof_state_[ANGULAR_X].offset_ + dof_state_[ANGULAR_X].value_;
-    msg->wrench.torque.y = dof_state_[ANGULAR_Y].offset_ + dof_state_[ANGULAR_Y].value_;
-    msg->wrench.torque.z = dof_state_[ANGULAR_Z].offset_ + dof_state_[ANGULAR_Z].value_;
-    wrench_pub_.publish(msg);
-  }
-  if ( altitude_updated )
-  {
-    std_msgs::Float32 altitude_request_msg;
-    altitude_request_msg.data = dof_state_[ALTITUDE].offset_ + dof_state_[ALTITUDE].value_;
-    altitude_request_pub_.publish(altitude_request_msg);
-  }
-}
-
-
-/** TeleopPolicy stop function redefinition.
- *
- * Send a wrench levels message with null wrench for every DOF.
- */
 void auv_teleoperation::AltitudeControlWrenchPolicy::stop()
 {
-  ROS_INFO_STREAM("Sending null command on wrench policy stop...");
-  geometry_msgs::WrenchStampedPtr msg(new geometry_msgs::WrenchStamped());
-  msg->header.stamp = ros::Time::now();
-  msg->header.frame_id = frame_id_;
-  msg->wrench.force.x = 0.0;
-  msg->wrench.force.y = 0.0;
-  msg->wrench.force.z = 0.0;
-  msg->wrench.torque.x = 0.0;
-  msg->wrench.torque.y = 0.0;
-  msg->wrench.torque.z = 0.0;
-  wrench_pub_.publish(msg);
-
-  ros::ServiceClient client = nh_.serviceClient<auv_control_msgs::EnableControl>("enable_altitude_control");
+  resetDOFStates();
+  updateDOFs(ros::Time::now());
+  ros::ServiceClient client = 
+    nh_.serviceClient<auv_control_msgs::EnableControl>(
+        "enable_altitude_control");
   auv_control_msgs::EnableControl control_service;
   control_service.request.enable = false;
   if (client.call(control_service))
@@ -244,7 +83,30 @@ void auv_teleoperation::AltitudeControlWrenchPolicy::stop()
   }
   else
   {
-    ROS_ERROR("Failed to call service %s", nh_.resolveName("enable_altitude_control").c_str());
+    ROS_ERROR("Failed to call service %s", 
+        nh_.resolveName("enable_altitude_control").c_str());
+  }
+}
+
+void auv_teleoperation::AltitudeControlWrenchPolicy::updateDOFs(
+     const ros::Time& stamp)
+{
+  geometry_msgs::WrenchStamped msg;
+  msg.header.stamp = stamp;
+  msg.header.frame_id = frame_id_;
+  msg.wrench.force.x = dof_states_[0].getValue();
+  msg.wrench.force.y = dof_states_[1].getValue();
+  msg.wrench.torque.x = dof_states_[3].getValue();
+  msg.wrench.torque.y = dof_states_[4].getValue();
+  msg.wrench.torque.z = dof_states_[5].getValue();
+  wrench_pub_.publish(msg);
+
+  if (dof_states_[2].updated)
+  {
+    std_msgs::Float32 altitude_request_msg;
+    altitude_request_msg.data = dof_states_[2].getValue();
+    ROS_INFO("Sending altitude request: %f", altitude_request_msg.data);
+    altitude_request_pub_.publish(altitude_request_msg);
   }
 }
 

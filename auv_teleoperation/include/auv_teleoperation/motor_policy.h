@@ -1,16 +1,9 @@
-/**
- * @file wrench_policy.h
- * @brief Motor teleoperation policy presentation.
- * @author Joan Pau Beltran, Stephan Wirth
- * @date 2011-06-29
- */
-
 #ifndef MOTOR_POLICY_H
 #define MOTOR_POLICY_H
 
 #include <ros/ros.h>
 #include <Eigen/Core>
-#include "auv_teleoperation/teleop_policy.h"
+#include "auv_teleoperation/teleoperation_policy.h"
 
 namespace auv_teleoperation
 {
@@ -18,47 +11,46 @@ namespace auv_teleoperation
 /** Motor teleoperation policy class.
  *
  * The motor policy responds to joystick events
- * controlling the motor levels on each pair of motors.
+ * controlling the motor levels on each motor.
  */
-class MotorPolicy : public TeleopPolicy
+class MotorPolicy : public TeleoperationPolicy
 {
 public:
-  MotorPolicy(const ros::NodeHandle& n, const ros::NodeHandle& p);
-  void init();
-  void update(const JoyState& j); //!< joystick response
-  void start();
-  void stop();
+  /**
+   * Constructs a motor policy with given node handles.
+   * The handle nh_priv will be used to get all parameters,
+   * the hande nh will be used to advertise topics.
+   */
+  MotorPolicy(ros::NodeHandle& nh, const ros::NodeHandle& nh_priv);
+
+  /**
+   * Sends motor levels set to zero
+   */
+  virtual void start();
+
+  /**
+   * Sends motor levels set to zero
+   */
+  virtual void pause();
+
+  /**
+   * Sends motor levels set to zero
+   */
+  virtual void stop();
 
 protected:
-  void sendStopMessage(const ros::Time& stamp);
+  /**
+   * translates requested DOF values to motor levels using the
+   * axes_to_motors_ matrix and sends an auv_control_msgs::MotorLevels
+   * message.
+   */
+  virtual void updateDOFs(const ros::Time& stamp);
 
 private:
   ros::NodeHandle nh_;
-  ros::NodeHandle priv_;
-  ros::Publisher publ_;
-
+  ros::NodeHandle nh_priv_;
   std::string frame_id_;
-  int pause_button_;
-
-  struct DOFState
-  {
-    float offset;
-    float value;
-  };
-
-  struct JoyDOFSetting
-  {
-    int joy_axis;
-    int negative_offset_button;
-    int positive_offset_button;
-    int reset_button;
-    float axis_factor;
-    float offset_step;
-  };
-
-  JoyDOFSetting joy_dof_settings_[6];
-  DOFState dof_states_[6];
-
+  ros::Publisher pub_;
   Eigen::MatrixXd axes_to_motors_;
 };
 
