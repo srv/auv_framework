@@ -238,7 +238,8 @@ if __name__ == "__main__":
         topic_monitor_params_list = rospy.get_param("~topic_monitors")
         topic_monitors = []
         for topic_monitor_params in topic_monitor_params_list:
-            topic_monitors.append(TopicMonitor.create(topic_monitor_params))
+            if topic_monitor_params:
+                topic_monitors.append(TopicMonitor.create(topic_monitor_params))
         controller_node = SafetyControllerNode(frequency, topic_monitors)
         rospy.spin()
     except KeyError as e:
