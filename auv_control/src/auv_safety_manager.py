@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import string
-import sys
-import threading
-import time
 
 import roslib.message
 import rosgraph
@@ -168,9 +165,10 @@ class TopicMonitor(object):
                 self.error = "Monitored topic " + self.topic + " not available!"
             elif topic_type:
                 data_class = roslib.message.get_message_class(topic_type)
-                self.sub = rospy.Subscriber(real_topic, data_class, self._message_callback)
-                timer_duration = rospy.rostime.Duration.from_sec(1.0)
-                self.frequency_timer = rospy.Timer(timer_duration, self._check_frequency)
+                if data_class:
+                    self.sub = rospy.Subscriber(real_topic, data_class, self._message_callback)
+                    timer_duration = rospy.rostime.Duration.from_sec(1.0)
+                    self.frequency_timer = rospy.Timer(timer_duration, self._check_frequency)
 
     def _check_frequency(self, event):
         if self.message_times:
