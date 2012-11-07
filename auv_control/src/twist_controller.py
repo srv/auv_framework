@@ -66,7 +66,6 @@ class TwistControllerNode():
         else:
             self.enabled = False
             response.enabled = False
-        response.current_setpoint = self.pid.getSetpoint()
         return response
 
     def reconfigure(self, config, level):
