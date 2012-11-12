@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+import roslib; roslib.load_manifest('auv_control')
 
 import string
-
 import roslib.message
-import rosgraph
 import rospy
 import rostopic
-import copy
+
+from std_srvs.srv import Empty as EmptyService
 
 from geometry_msgs.msg import WrenchStamped
+from auv_control_msgs.msg import MotorLevels
 
 class Error(Exception):
     def __init__(self, error):
@@ -108,7 +109,7 @@ class TopicMonitor(object):
     _timer_callback(), the message field values are checked on each incoming
     message.
     When an error is found (frequency or field values outside limits),
-    an exception is raised.
+    an error flag is set.
     The frequency is calculated as a mean over 10 messages.
     """
     def __init__(self, topic, frequency_limit, field_monitors):
@@ -189,49 +190,71 @@ class TopicMonitor(object):
                 self.error = FrequencyError("Frequency of " + self.topic + " is too high!")
 
 class SafetyControllerNode(object):
+    """
+    Node that subscribes to wrench and motor levels inputs, while monitoring
+    topic frequencies and values. If everything is ok, the inputs are forwarded.
+    If an error is detected, i.e. an error flag of a topic monitor is set,
+    no more inputs are forwarded and the vehicle is brought to the surface
+    by sending a negative z wrench.
+    """
     def __init__(self, frequency, topic_monitors):
         self.topic_monitors = topic_monitors
         self.wrench_input = WrenchStamped()
         self.INPUT_TIMEOUT = 5.0 
         self.last_input_time = rospy.Time.now()
-        rospy.Subscriber('wrench_request', WrenchStamped, self.wrenchInputCallback)
-        self.pub = rospy.Publisher('wrench', WrenchStamped)
+        self.safety_error = False
+        rospy.Subscriber('wrench_request', WrenchStamped, self.wrenchCallback)
+        rospy.Subscriber('motor_levels_request', MotorLevels, self.motorLevelsCallback)
+        self.wrench_pub = rospy.Publisher('wrench', WrenchStamped)
+        self.motor_levels_pub = rospy.Publisher('motor_levels', MotorLevels)
         period = rospy.rostime.Duration.from_sec(1.0/frequency)
-        self.timer = rospy.Timer(period, self.sendWrench)
+        self.timer = rospy.Timer(period, self.checkForErrors)
+        self.reset_service = rospy.Service('~reset', EmptyService, self.reset)
  
-    def wrenchInputCallback(self, wrench):
-        self.wrench_input = wrench
+    def wrenchCallback(self, wrench):
+        if not self.safety_error:
+            self.wrench_pub.publish(wrench)
         self.last_input_time = rospy.Time.now()
 
-    def sendWrench(self, event):
+    def motorLevelsCallback(self, levels):
+        if not self.safety_error:
+            self.motor_levels_pub.publish(levels)
+        self.last_input_time = rospy.Time.now()
+
+    def checkForErrors(self, event):
         """
-        Publishes a wrench. If the safety monitors detect an error,
-        the wrench will have all values set to zero but force.z will be set
-        to -1 to bring the vehicle up.
-        Else the requested wrench will be forwarded if it was in time. If
-        no error occured but the last input has been send longer ago that
-        self.INPUT_TIMEOUT, a zero wrench is published.
+        Checks for two kinds of errors safety error and input timeout.
+        If the safety monitors detect an error, a wrench will be sent with
+        all values set to zero but force.z set to -1 to bring the vehicle up.
+        If the last input is longer ago that self.INPUT_TIMEOUT, a zero
+        wrench is published to stop the vehicle.
         """
-        safety_error = False
         for topic_monitor in self.topic_monitors:
             if topic_monitor.error:
                 rospy.logerr("Safety Error: " + str(topic_monitor.error))
-                safety_error = True
+                self.safety_error = True
         input_in_time = (rospy.Time.now() - 
                 self.last_input_time).to_sec() < self.INPUT_TIMEOUT
-        wrench_output = WrenchStamped()
-        if safety_error:
-            wrench_output.wrench.force.z = -1
-        elif input_in_time:
-            wrench_output = copy.deepcopy(self.wrench_input)
-        # else wrench is default constructed and has only zeroes.
-        wrench_output.header.frame_id = 'base_link'
-        wrench_output.header.stamp = rospy.Time.now()
-        self.pub.publish(wrench_output)
+        if self.safety_error or not input_in_time:
+            wrench_msg = WrenchStamped()
+            wrench_msg.header.frame_id = 'base_link'
+            wrench_msg.header.stamp = rospy.Time.now()
+            if self.safety_error:
+                wrench_msg.wrench.force.z = -1
+            self.wrench_pub.publish(wrench_msg)
+
+    def reset(self, req):
+        for topic_monitor in self.topic_monitors:
+            topic_monitor.error = None
+        self.safety_error = False
+        wrench_msg = WrenchStamped()
+        wrench_msg.header.frame_id = 'base_link'
+        wrench_msg.header.stamp = rospy.Time.now()
+        self.wrench_pub.publish(wrench_msg)
 
 if __name__ == "__main__":
     rospy.init_node('auv_safety_manager')
-    frequency = rospy.get_param("~frequency", 10.0)
+    frequency = rospy.get_param("~frequency", 1.0) # error checking frequency
     try:
         topic_monitor_params_list = rospy.get_param("~topic_monitors")
         topic_monitors = []
