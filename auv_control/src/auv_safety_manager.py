@@ -200,7 +200,7 @@ class SafetyControllerNode(object):
     def __init__(self, frequency, topic_monitors):
         self.topic_monitors = topic_monitors
         self.wrench_input = WrenchStamped()
-        self.INPUT_TIMEOUT = 5.0 
+        self.INPUT_TIMEOUT = 60.0 
         self.last_input_time = rospy.Time.now()
         self.safety_error = False
         rospy.Subscriber('wrench_request', WrenchStamped, self.wrenchCallback)
