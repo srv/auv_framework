@@ -9,7 +9,7 @@ import copy
 import auv_control_msgs.srv
 from auv_control.cfg import DepthControllerConfig
 from pid import Pid
-from srv_msgs.msg import Depth
+from auv_sensor_msgs.msg import Depth
 from std_msgs.msg import Float32
 from geometry_msgs.msg import WrenchStamped
 
@@ -19,7 +19,7 @@ class DepthControllerNode():
     constant. As only one DOF -namely z- is controlled, the
     other values have to be given by some other input, e.g. via joystick.
 
-    This node subscribes to 'depth', expecting a srv_msgs/Depth message
+    This node subscribes to 'depth', expecting a auv_sensor_msgs/Depth message
     and to 'wrench_input' which should be of type geometry_msgs/WrenchStamped.
     The node also receives std_msgs/Float32 messages on the topic 
     'depth_request' to define the required depth (setpoint).
