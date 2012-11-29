@@ -13,6 +13,7 @@
   <depend package="rospy"/>
   <depend package="driver_base"/>
   <depend package="std_srvs"/>
+  <depend package="auv_sensor_msgs"/>
 
 </package>
 
