@@ -128,11 +128,11 @@ class TwistControllerNode():
            if self.isFeedbackValid():
                dt = (event.current_real - event.last_real).to_sec()
                wrench_output.wrench.force.x = self.pids[0].update(self.last_feedback.twist.twist.linear.x, dt)
-               wrench_output.wrench.force.y = self.pids[0].update(self.last_feedback.twist.twist.linear.y, dt)
-               wrench_output.wrench.force.z = self.pids[0].update(self.last_feedback.twist.twist.linear.z, dt)
-               wrench_output.wrench.torque.x = self.pids[0].update(self.last_feedback.twist.twist.angular.x, dt)
-               wrench_output.wrench.torque.y = self.pids[0].update(self.last_feedback.twist.twist.angular.y, dt)
-               wrench_output.wrench.torque.z = self.pids[0].update(self.last_feedback.twist.twist.angular.z, dt)
+               wrench_output.wrench.force.y = self.pids[1].update(self.last_feedback.twist.twist.linear.y, dt)
+               wrench_output.wrench.force.z = self.pids[2].update(self.last_feedback.twist.twist.linear.z, dt)
+               wrench_output.wrench.torque.x = self.pids[3].update(self.last_feedback.twist.twist.angular.x, dt)
+               wrench_output.wrench.torque.y = self.pids[4].update(self.last_feedback.twist.twist.angular.y, dt)
+               wrench_output.wrench.torque.z = self.pids[5].update(self.last_feedback.twist.twist.angular.z, dt)
            else:
                rospy.logwarn("Odometry feedback is invalid, setting wrench to zero.")
            wrench_output.header.stamp = rospy.Time.now()
