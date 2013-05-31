@@ -1,0 +1,38 @@
+<package>
+  <name>auv_teleoperation</name>
+  <version>0.0.1</version>
+  <description>Teleoperation package for UUVs. Currently includes 
+     a joystick sampler library and a joystick teleoperation node.
+     
+     The node provides several control modes that can be switched online.
+     Joystick commands are translated to twist, wrench or motor levels
+     depending on the current mode, and published on the corresponding topic.</description>
+  <maintainer email="stwirth@uib.es">Stephan Wirth</maintainer>
+  <maintainer email="miquel.massot@uib.es">Miquel Massot</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/auv_teleoperation</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author email="joanpau.beltran@uib.cat">Joan Pau Beltran</author>
+  <author email="stwirth@uib.es">Stephan Wirth</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>auv_control_msgs</build_depend> 
+  <build_depend>roscpp</build_depend> 
+  <build_depend>sensor_msgs</build_depend> 
+  <build_depend>std_msgs</build_depend> 
+  <run_depend>auv_control_msgs</run_depend> 
+  <run_depend>roscpp</run_depend> 
+  <run_depend>sensor_msgs</run_depend> 
+  <run_depend>std_msgs</run_depend>
+  <!-- <test_depend>auv_control_msgs</test_depend> -->
+  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>sensor_msgs</test_depend> -->
+  <!-- <test_depend>std_msgs</test_depend> -->
+
+  <export>
+    
+  </export>
+</package>

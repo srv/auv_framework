@@ -1,28 +1,20 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
-
-rosbuild_init()
-
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+cmake_minimum_required(VERSION 2.8.3)
+project(auv_teleoperation)
+find_package(catkin REQUIRED COMPONENTS auv_control_msgs roscpp sensor_msgs std_msgs eigen)
 
 find_package(Eigen REQUIRED)
-include_directories(${EIGEN_INCLUDE_DIRS})
 
-rosbuild_add_library(joy_state src/joy_state.cpp)
-rosbuild_add_library(joy_dof_mapping src/joy_dof_mapping.cpp)
+catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES joy_state
+)
 
-rosbuild_add_executable(teleoperation_joy_node 
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}) 
+
+add_library(joy_state src/joy_state.cpp)
+add_library(joy_dof_mapping src/joy_dof_mapping.cpp)
+
+add_executable(teleoperation_joy_node 
                           src/teleoperation_joy_node.cpp
                           src/motor_policy.cpp
                           src/wrench_policy.cpp
@@ -30,5 +22,10 @@ rosbuild_add_executable(teleoperation_joy_node
                           src/depth_control_wrench_policy.cpp
                           src/twist_policy.cpp
 )
-target_link_libraries(teleoperation_joy_node joy_state joy_dof_mapping)
+target_link_libraries(teleoperation_joy_node joy_state joy_dof_mapping ${catkin_LIBRARIES})
 
+
+####################################
+#   OJO AMB AIXÒ! Tret del manifest!
+####################################
+#<cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljoy_state" cflags="-I${prefix}/include"/>
