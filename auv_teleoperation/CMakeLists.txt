@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(auv_teleoperation)
-find_package(catkin REQUIRED COMPONENTS auv_control_msgs roscpp sensor_msgs std_msgs eigen)
+find_package(catkin REQUIRED COMPONENTS auv_control_msgs roscpp sensor_msgs std_msgs cmake_modules)
 
 find_package(Eigen REQUIRED)
 
